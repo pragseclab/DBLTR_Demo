@@ -1,0 +1,9 @@
+- Installed new theme
+
+- Set it up with appropriate settings, layout, color, typography
+
+- Installed caching plugin and set it up for maximum performance (you may notice that site loads up very quickly)
+
+- Linked social media accounts
+
+- Imported existing content and images

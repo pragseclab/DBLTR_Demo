@@ -1,0 +1,4 @@
+{"log":"AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.5. Set the 'ServerName' directive globally to suppress this message\r\n","stream":"stdout","time":"2021-06-24T23:49:28.226764637Z"}
+{"log":"AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.5. Set the 'ServerName' directive globally to suppress this message\r\n","stream":"stdout","time":"2021-08-26T14:25:39.628729642Z"}
+{"log":"AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.4. Set the 'ServerName' directive globally to suppress this message\r\n","stream":"stdout","time":"2021-09-15T19:49:37.329735202Z"}
+{"log":"AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.5. Set the 'ServerName' directive globally to suppress this message\r\n","stream":"stdout","time":"2021-09-16T18:01:27.180144169Z"}

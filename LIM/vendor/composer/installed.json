@@ -1,0 +1,105 @@
+{
+    "packages": [
+        {
+            "name": "nikic/php-parser",
+            "version": "v4.13.2",
+            "version_normalized": "4.13.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nikic/PHP-Parser.git",
+                "reference": "210577fe3cf7badcc5814d99455df46564f3c077"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/210577fe3cf7badcc5814d99455df46564f3c077",
+                "reference": "210577fe3cf7badcc5814d99455df46564f3c077",
+                "shasum": ""
+            },
+            "require": {
+                "ext-tokenizer": "*",
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "ircmaxell/php-yacc": "^0.0.7",
+                "phpunit/phpunit": "^6.5 || ^7.0 || ^8.0 || ^9.0"
+            },
+            "time": "2021-11-30T19:35:32+00:00",
+            "bin": [
+                "bin/php-parse"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.9-dev"
+                }
+            },
+            "installation-source": "source",
+            "autoload": {
+                "psr-4": {
+                    "PhpParser\\": "lib/PhpParser"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Nikita Popov"
+                }
+            ],
+            "description": "A PHP parser written in PHP",
+            "keywords": [
+                "parser",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/nikic/PHP-Parser/issues",
+                "source": "https://github.com/nikic/PHP-Parser/tree/v4.13.2"
+            },
+            "install-path": "../nikic/php-parser"
+        },
+        {
+            "name": "siteworxpro/cli-progress-bar",
+            "version": "1.1.2",
+            "version_normalized": "1.1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/siteworxpro/cli-progress-bar.git",
+                "reference": "5f644ad0c022d58ec8b39f19292e942a590fd944"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/siteworxpro/cli-progress-bar/zipball/5f644ad0c022d58ec8b39f19292e942a590fd944",
+                "reference": "5f644ad0c022d58ec8b39f19292e942a590fd944",
+                "shasum": ""
+            },
+            "time": "2018-04-04T13:47:56+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Siteworx\\ProgressBar\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Siteworxpro",
+                    "email": "websites@siteworxpro.com"
+                }
+            ],
+            "description": "Cli progress bar",
+            "support": {
+                "issues": "https://github.com/siteworxpro/cli-progress-bar/issues",
+                "source": "https://github.com/siteworxpro/cli-progress-bar/tree/master"
+            },
+            "install-path": "../siteworxpro/cli-progress-bar"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}

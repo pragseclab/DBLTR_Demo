@@ -1,0 +1,18 @@
+{
+    "name": "siteworxpro/cli-progress-bar",
+    "description": "Cli progress bar",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Siteworxpro",
+            "email": "websites@siteworxpro.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Siteworx\\ProgressBar\\": "src/"
+        }
+    }
+}

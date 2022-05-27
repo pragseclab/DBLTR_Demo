@@ -1,0 +1,213 @@
+<?php
+
+/**
+ * WordPress List utility class
+ *
+ * @package WordPress
+ * @since 4.7.0
+ */
+/**
+ * List utility.
+ *
+ * Utility class to handle operations on an array of objects.
+ *
+ * @since 4.7.0
+ */
+class WP_List_Util
+{
+    /**
+     * The input array.
+     *
+     * @since 4.7.0
+     * @var array
+     */
+    private $input = array();
+    /**
+     * The output array.
+     *
+     * @since 4.7.0
+     * @var array
+     */
+    private $output = array();
+    /**
+     * Temporary arguments for sorting.
+     *
+     * @since 4.7.0
+     * @var array
+     */
+    private $orderby = array();
+    /**
+     * Constructor.
+     *
+     * Sets the input array.
+     *
+     * @since 4.7.0
+     *
+     * @param array $input Array to perform operations on.
+     */
+    public function __construct($input)
+    {
+        $this->output = $input;
+        $this->input = $input;
+    }
+    /**
+     * Returns the original input array.
+     *
+     * @since 4.7.0
+     *
+     * @return array The input array.
+     */
+    public function get_input()
+    {
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("get_input") from ("/home/jovyan/work/WebApps/WP_spectral_Clusters/WP_spectral_5/wp-includes/class-wp-list-util.php at line 62")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called get_input:62@/home/jovyan/work/WebApps/WP_spectral_Clusters/WP_spectral_5/wp-includes/class-wp-list-util.php');
+        die();
+    }
+    /**
+     * Returns the output array.
+     *
+     * @since 4.7.0
+     *
+     * @return array The output array.
+     */
+    public function get_output()
+    {
+        return $this->output;
+    }
+    /**
+     * Filters the list, based on a set of key => value arguments.
+     *
+     * @since 4.7.0
+     *
+     * @param array  $args     Optional. An array of key => value arguments to match
+     *                         against each object. Default empty array.
+     * @param string $operator Optional. The logical operation to perform. 'AND' means
+     *                         all elements from the array must match. 'OR' means only
+     *                         one element needs to match. 'NOT' means no elements may
+     *                         match. Default 'AND'.
+     * @return array Array of found values.
+     */
+    public function filter($args = array(), $operator = 'AND')
+    {
+        if (empty($args)) {
+            return $this->output;
+        }
+        $operator = strtoupper($operator);
+        if (!in_array($operator, array('AND', 'OR', 'NOT'), true)) {
+            return array();
+        }
+        $count = count($args);
+        $filtered = array();
+        foreach ($this->output as $key => $obj) {
+            $matched = 0;
+            foreach ($args as $m_key => $m_value) {
+                if (is_array($obj)) {
+                    // Treat object as an array.
+                    if (array_key_exists($m_key, $obj) && $m_value == $obj[$m_key]) {
+                        $matched++;
+                    }
+                } elseif (is_object($obj)) {
+                    // Treat object as an object.
+                    if (isset($obj->{$m_key}) && $m_value == $obj->{$m_key}) {
+                        $matched++;
+                    }
+                }
+            }
+            if ('AND' === $operator && $matched === $count || 'OR' === $operator && $matched > 0 || 'NOT' === $operator && 0 === $matched) {
+                $filtered[$key] = $obj;
+            }
+        }
+        $this->output = $filtered;
+        return $this->output;
+    }
+    /**
+     * Plucks a certain field out of each object in the list.
+     *
+     * This has the same functionality and prototype of
+     * array_column() (PHP 5.5) but also supports objects.
+     *
+     * @since 4.7.0
+     *
+     * @param int|string $field     Field from the object to place instead of the entire object
+     * @param int|string $index_key Optional. Field from the object to use as keys for the new array.
+     *                              Default null.
+     * @return array Array of found values. If `$index_key` is set, an array of found values with keys
+     *               corresponding to `$index_key`. If `$index_key` is null, array keys from the original
+     *               `$list` will be preserved in the results.
+     */
+    public function pluck($field, $index_key = null)
+    {
+        $newlist = array();
+        if (!$index_key) {
+            /*
+             * This is simple. Could at some point wrap array_column()
+             * if we knew we had an array of arrays.
+             */
+            foreach ($this->output as $key => $value) {
+                if (is_object($value)) {
+                    $newlist[$key] = $value->{$field};
+                } else {
+                    $newlist[$key] = $value[$field];
+                }
+            }
+            $this->output = $newlist;
+            return $this->output;
+        }
+        /*
+         * When index_key is not set for a particular item, push the value
+         * to the end of the stack. This is how array_column() behaves.
+         */
+        foreach ($this->output as $value) {
+            if (is_object($value)) {
+                if (isset($value->{$index_key})) {
+                    $newlist[$value->{$index_key}] = $value->{$field};
+                } else {
+                    $newlist[] = $value->{$field};
+                }
+            } else {
+                if (isset($value[$index_key])) {
+                    $newlist[$value[$index_key]] = $value[$field];
+                } else {
+                    $newlist[] = $value[$field];
+                }
+            }
+        }
+        $this->output = $newlist;
+        return $this->output;
+    }
+    /**
+     * Sorts the list, based on one or more orderby arguments.
+     *
+     * @since 4.7.0
+     *
+     * @param string|array $orderby       Optional. Either the field name to order by or an array
+     *                                    of multiple orderby fields as $orderby => $order.
+     * @param string       $order         Optional. Either 'ASC' or 'DESC'. Only used if $orderby
+     *                                    is a string.
+     * @param bool         $preserve_keys Optional. Whether to preserve keys. Default false.
+     * @return array The sorted array.
+     */
+    public function sort($orderby = array(), $order = 'ASC', $preserve_keys = false)
+    {
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("sort") from ("/home/jovyan/work/WebApps/WP_spectral_Clusters/WP_spectral_5/wp-includes/class-wp-list-util.php at line 190")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called sort:190@/home/jovyan/work/WebApps/WP_spectral_Clusters/WP_spectral_5/wp-includes/class-wp-list-util.php');
+        die();
+    }
+    /**
+     * Callback to sort the list by specific fields.
+     *
+     * @since 4.7.0
+     *
+     * @see WP_List_Util::sort()
+     *
+     * @param object|array $a One object to compare.
+     * @param object|array $b The other object to compare.
+     * @return int 0 if both objects equal. -1 if second object should come first, 1 otherwise.
+     */
+    private function sort_callback($a, $b)
+    {
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("sort_callback") from ("/home/jovyan/work/WebApps/WP_spectral_Clusters/WP_spectral_5/wp-includes/class-wp-list-util.php at line 221")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called sort_callback:221@/home/jovyan/work/WebApps/WP_spectral_Clusters/WP_spectral_5/wp-includes/class-wp-list-util.php');
+        die();
+    }
+}

@@ -1,0 +1,5 @@
+- Installed and setup a new theme
+- Updated home and blog page
+- Installed and setup these plugins:
+  - WP File Manager
+  - Divi theme editor

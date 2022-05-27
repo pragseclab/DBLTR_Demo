@@ -1,0 +1,2 @@
+SET MP_PMA_alice 1
+SET MP_PMA_bob 2

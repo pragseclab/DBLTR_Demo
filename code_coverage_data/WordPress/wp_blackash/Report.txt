@@ -1,0 +1,14 @@
+﻿Frequently USED:
+          1) WordPress Theme Management
+2) Plugin Management
+3) WordPress Post, page
+4) Category management
+5) Contact form plugin
+6) Security plugin
+
+
+Often used
+1. User management
+2. Theme editor
+3. Plugin Editor
+4. Enqueue script and styles.

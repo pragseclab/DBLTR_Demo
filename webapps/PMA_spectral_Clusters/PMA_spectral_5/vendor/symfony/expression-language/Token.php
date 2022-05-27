@@ -1,0 +1,63 @@
+<?php
+
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace Symfony\Component\ExpressionLanguage;
+
+/**
+ * Represents a Token.
+ *
+ * @author Fabien Potencier <fabien@symfony.com>
+ */
+class Token
+{
+    public $value;
+    public $type;
+    public $cursor;
+    public const EOF_TYPE = 'end of expression';
+    public const NAME_TYPE = 'name';
+    public const NUMBER_TYPE = 'number';
+    public const STRING_TYPE = 'string';
+    public const OPERATOR_TYPE = 'operator';
+    public const PUNCTUATION_TYPE = 'punctuation';
+    /**
+     * @param string                $type   The type of the token (self::*_TYPE)
+     * @param string|int|float|null $value  The token value
+     * @param int                   $cursor The cursor position in the source
+     */
+    public function __construct(string $type, $value, ?int $cursor)
+    {
+        $this->type = $type;
+        $this->value = $value;
+        $this->cursor = $cursor;
+    }
+    /**
+     * Returns a string representation of the token.
+     *
+     * @return string A string representation of the token
+     */
+    public function __toString()
+    {
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("__toString") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_5/vendor/symfony/expression-language/Token.php at line 47")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called __toString:47@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_5/vendor/symfony/expression-language/Token.php');
+        die();
+    }
+    /**
+     * Tests the current token for a type and/or a value.
+     *
+     * @param string      $type  The type to test
+     * @param string|null $value The token value
+     *
+     * @return bool
+     */
+    public function test($type, $value = null)
+    {
+        return $this->type === $type && (null === $value || $this->value == $value);
+    }
+}

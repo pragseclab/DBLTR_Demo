@@ -1,0 +1,10 @@
+SetEnv lim_test_group "wp58_userstudy"
+SetEnv lim_test_name "wp58_userstudy"
+SetEnv lim_software_id "4"
+SetEnv lim_software_version_id "29"
+# BEGIN WordPress
+# The directives (lines) between "BEGIN WordPress" and "END WordPress" are
+# dynamically generated, and should only be modified via WordPress filters.
+# Any changes to the directives between these markers will be overwritten.
+
+# END WordPress
