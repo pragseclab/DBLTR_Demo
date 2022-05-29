@@ -34,6 +34,8 @@ For the sections where pickle file is available, you can jump to the end of the 
   In order to serve the debloated web applications, we need to copy the user-to-role mappings under `dockerfiles/bootstrap/mappings.txt`. Next, we use `docker-compose up -d` under docker-compose directory after renaming the desired docker-compose file (phpMyAdmin or WordPress in this example) to docker-compose.yml.
   The web applications will be served under localhost:8080.
   Upon logging in, each the authentication cookie of each user is extracted by our OpenResty Lua modules and stored in the Redis datastore. Subsequent requests from users containing the authentication cookie will instruct the reverse-proxy to transparently route their requests towards their custom debloated web applications. 
+  
+A Demo is available here at: https://vimeo.com/manage/videos/652161913
 
 ### Adding new web applications to *DBLTR* 
 
