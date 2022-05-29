@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of the Recursion Context package.
  *
@@ -8,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace SebastianBergmann\RecursionContext;
 
 /**
@@ -20,18 +20,21 @@ final class Context
      * @var array[]
      */
     private $arrays;
+
     /**
      * @var \SplObjectStorage
      */
     private $objects;
+
     /**
      * Initialises the context
      */
     public function __construct()
     {
-        $this->arrays = array();
-        $this->objects = new \SplObjectStorage();
+        $this->arrays  = array();
+        $this->objects = new \SplObjectStorage;
     }
+
     /**
      * Adds a value to the context.
      *
@@ -48,8 +51,12 @@ final class Context
         } elseif (is_object($value)) {
             return $this->addObject($value);
         }
-        throw new InvalidArgumentException('Only arrays and objects are supported');
+
+        throw new InvalidArgumentException(
+            'Only arrays and objects are supported'
+        );
     }
+
     /**
      * Checks if the given value exists within the context.
      *
@@ -66,8 +73,12 @@ final class Context
         } elseif (is_object($value)) {
             return $this->containsObject($value);
         }
-        throw new InvalidArgumentException('Only arrays and objects are supported');
+
+        throw new InvalidArgumentException(
+            'Only arrays and objects are supported'
+        );
     }
+
     /**
      * @param array $array
      *
@@ -76,27 +87,16 @@ final class Context
     private function addArray(array &$array)
     {
         $key = $this->containsArray($array);
+
         if ($key !== false) {
             return $key;
         }
-        $key = count($this->arrays);
-        $this->arrays[] =& $array;
-        if (!isset($array[PHP_INT_MAX]) && !isset($array[PHP_INT_MAX - 1])) {
-            $array[] = $key;
-            $array[] = $this->objects;
-        } else {
-            /* cover the improbable case too */
-            do {
-                $key = random_int(PHP_INT_MIN, PHP_INT_MAX);
-            } while (isset($array[$key]));
-            $array[$key] = $key;
-            do {
-                $key = random_int(PHP_INT_MIN, PHP_INT_MAX);
-            } while (isset($array[$key]));
-            $array[$key] = $this->objects;
-        }
-        return $key;
+
+        $this->arrays[] = &$array;
+
+        return count($this->arrays) - 1;
     }
+
     /**
      * @param object $object
      *
@@ -107,8 +107,10 @@ final class Context
         if (!$this->objects->contains($object)) {
             $this->objects->attach($object);
         }
+
         return spl_object_hash($object);
     }
+
     /**
      * @param array $array
      *
@@ -116,9 +118,24 @@ final class Context
      */
     private function containsArray(array &$array)
     {
-        $end = array_slice($array, -2);
-        return isset($end[1]) && $end[1] === $this->objects ? $end[0] : false;
+        $keys = array_keys($this->arrays, $array, true);
+        $hash = '_Key_' . microtime(true);
+
+        foreach ($keys as $key) {
+            $this->arrays[$key][$hash] = $hash;
+
+            if (isset($array[$hash]) && $array[$hash] === $hash) {
+                unset($this->arrays[$key][$hash]);
+
+                return $key;
+            }
+
+            unset($this->arrays[$key][$hash]);
+        }
+
+        return false;
     }
+
     /**
      * @param object $value
      *
@@ -129,27 +146,7 @@ final class Context
         if ($this->objects->contains($value)) {
             return spl_object_hash($value);
         }
+
         return false;
-    }
-    public function __destruct()
-    {
-        $stop_coverage = false;
-        if (function_exists('end_coverage_cav39s8hca')) {
-            $stop_coverage = !xdebug_code_coverage_started();
-            if (!xdebug_code_coverage_started()) {
-                xdebug_start_code_coverage();
-            }
-        }
-        foreach ($this->arrays as &$array) {
-            if (is_array($array)) {
-                array_pop($array);
-                array_pop($array);
-            }
-        }
-        if (function_exists('end_coverage_cav39s8hca')) {
-            if ($stop_coverage) {
-                end_coverage_cav39s8hca($stop_coverage);
-            }
-        }
     }
 }

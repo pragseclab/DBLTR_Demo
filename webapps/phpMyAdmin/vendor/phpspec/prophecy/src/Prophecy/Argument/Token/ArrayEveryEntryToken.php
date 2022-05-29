@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Argument\Token;
 
 /**
@@ -21,6 +22,7 @@ class ArrayEveryEntryToken implements TokenInterface
      * @var TokenInterface
      */
     private $value;
+
     /**
      * @param mixed $value exact value or token
      */
@@ -29,8 +31,10 @@ class ArrayEveryEntryToken implements TokenInterface
         if (!$value instanceof TokenInterface) {
             $value = new ExactValueToken($value);
         }
+
         $this->value = $value;
     }
+
     /**
      * {@inheritdoc}
      */
@@ -39,15 +43,19 @@ class ArrayEveryEntryToken implements TokenInterface
         if (!$argument instanceof \Traversable && !is_array($argument)) {
             return false;
         }
+
         $scores = array();
         foreach ($argument as $key => $argumentEntry) {
             $scores[] = $this->value->scoreArgument($argumentEntry);
         }
+
         if (empty($scores) || in_array(false, $scores, true)) {
             return false;
         }
+
         return array_sum($scores) / count($scores);
     }
+
     /**
      * {@inheritdoc}
      */
@@ -55,6 +63,7 @@ class ArrayEveryEntryToken implements TokenInterface
     {
         return false;
     }
+
     /**
      * {@inheritdoc}
      */
@@ -62,6 +71,7 @@ class ArrayEveryEntryToken implements TokenInterface
     {
         return sprintf('[%s, ..., %s]', $this->value, $this->value);
     }
+
     /**
      * @return TokenInterface
      */

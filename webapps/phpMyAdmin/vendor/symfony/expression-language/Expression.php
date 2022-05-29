@@ -18,9 +18,14 @@ namespace Symfony\Component\ExpressionLanguage;
 class Expression
 {
     protected $expression;
-    public function __construct(string $expression)
+    /**
+     * Constructor.
+     *
+     * @param string $expression An expression
+     */
+    public function __construct($expression)
     {
-        $this->expression = $expression;
+        $this->expression = (string) $expression;
     }
     /**
      * Gets the expression.

@@ -12,10 +12,10 @@ namespace Symfony\Component\Console\Command;
 
 use Symfony\Component\Console\Helper\DescriptorHelper;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputDefinition;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputDefinition;
 /**
  * ListCommand displays the list of all available commands for the application.
  *
@@ -60,11 +60,13 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $helper = new DescriptorHelper();
-        $helper->describe($output, $this->getApplication(), ['format' => $input->getOption('format'), 'raw_text' => $input->getOption('raw'), 'namespace' => $input->getArgument('namespace')]);
-        return 0;
+        $helper->describe($output, $this->getApplication(), array('format' => $input->getOption('format'), 'raw_text' => $input->getOption('raw'), 'namespace' => $input->getArgument('namespace')));
     }
-    private function createDefinition() : InputDefinition
+    /**
+     * {@inheritdoc}
+     */
+    private function createDefinition()
     {
-        return new InputDefinition([new InputArgument('namespace', InputArgument::OPTIONAL, 'The namespace name'), new InputOption('raw', null, InputOption::VALUE_NONE, 'To output raw command list'), new InputOption('format', null, InputOption::VALUE_REQUIRED, 'The output format (txt, xml, json, or md)', 'txt')]);
+        return new InputDefinition(array(new InputArgument('namespace', InputArgument::OPTIONAL, 'The namespace name'), new InputOption('raw', null, InputOption::VALUE_NONE, 'To output raw command list'), new InputOption('format', null, InputOption::VALUE_REQUIRED, 'The output format (txt, xml, json, or md)', 'txt')));
     }
 }

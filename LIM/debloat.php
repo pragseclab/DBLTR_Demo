@@ -15,7 +15,6 @@ function debloat_functions($web_application_files, $line_coverage_information) {
             $covered_lines = $line_coverage_information[normalize_file_name_by_slash($file_name, 7)] ?? [];
             if (count($covered_lines) > 0) {
                 echo 'DEBLOATING FUNCTIONS<br />';
-                // echo $file_name . ' ' . print_r($covered_lines) . '<br />';
                 $code = file_get_contents($file_name);
                 $traverser = new NodeTraverser;
                 echo '<hr />' . $file_name . ':<br />';

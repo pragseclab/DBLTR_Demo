@@ -8,10 +8,12 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Doubler\ClassPatch;
 
 use Prophecy\Doubler\Generator\Node\ClassNode;
 use Prophecy\Doubler\Generator\Node\MethodNode;
+
 /**
  * SplFileInfo patch.
  * Makes SplFileInfo and derivative classes usable with Prophecy.
@@ -32,8 +34,12 @@ class SplFileInfoPatch implements ClassPatchInterface
         if (null === $node->getParentClass()) {
             return false;
         }
-        return 'SplFileInfo' === $node->getParentClass() || is_subclass_of($node->getParentClass(), 'SplFileInfo');
+
+        return 'SplFileInfo' === $node->getParentClass()
+            || is_subclass_of($node->getParentClass(), 'SplFileInfo')
+        ;
     }
+
     /**
      * Updated constructor code to call parent one with dummy file argument.
      *
@@ -47,22 +53,22 @@ class SplFileInfoPatch implements ClassPatchInterface
             $constructor = new MethodNode('__construct');
             $node->addMethod($constructor);
         }
+
         if ($this->nodeIsDirectoryIterator($node)) {
             $constructor->setCode('return parent::__construct("' . __DIR__ . '");');
+
             return;
         }
+
         if ($this->nodeIsSplFileObject($node)) {
-            $filePath = str_replace('\\', '\\\\', __FILE__);
-            $constructor->setCode('return parent::__construct("' . $filePath . '");');
+            $constructor->setCode('return parent::__construct("' . __FILE__ .'");');
+
             return;
         }
-        if ($this->nodeIsSymfonySplFileInfo($node)) {
-            $filePath = str_replace('\\', '\\\\', __FILE__);
-            $constructor->setCode('return parent::__construct("' . $filePath . '", "", "");');
-            return;
-        }
+
         $constructor->useParentCode();
     }
+
     /**
      * Returns patch priority, which determines when patch will be applied.
      *
@@ -72,6 +78,7 @@ class SplFileInfoPatch implements ClassPatchInterface
     {
         return 50;
     }
+
     /**
      * @param ClassNode $node
      * @return boolean
@@ -79,8 +86,11 @@ class SplFileInfoPatch implements ClassPatchInterface
     private function nodeIsDirectoryIterator(ClassNode $node)
     {
         $parent = $node->getParentClass();
-        return 'DirectoryIterator' === $parent || is_subclass_of($parent, 'DirectoryIterator');
+
+        return 'DirectoryIterator' === $parent
+            || is_subclass_of($parent, 'DirectoryIterator');
     }
+
     /**
      * @param ClassNode $node
      * @return boolean
@@ -88,15 +98,8 @@ class SplFileInfoPatch implements ClassPatchInterface
     private function nodeIsSplFileObject(ClassNode $node)
     {
         $parent = $node->getParentClass();
-        return 'SplFileObject' === $parent || is_subclass_of($parent, 'SplFileObject');
-    }
-    /**
-     * @param ClassNode $node
-     * @return boolean
-     */
-    private function nodeIsSymfonySplFileInfo(ClassNode $node)
-    {
-        $parent = $node->getParentClass();
-        return 'Symfony\\Component\\Finder\\SplFileInfo' === $parent;
+
+        return 'SplFileObject' === $parent
+            || is_subclass_of($parent, 'SplFileObject');
     }
 }

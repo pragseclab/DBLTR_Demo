@@ -44,9 +44,6 @@ class Random
      */
     static function string($length)
     {
-        if (!$length) {
-            return '';
-        }
         if (version_compare(PHP_VERSION, '7.0.0', '>=')) {
             try {
                 return \random_bytes($length);
@@ -63,7 +60,7 @@ class Random
             // method 1. prior to PHP 5.3 this would call rand() on windows hence the function_exists('class_alias') call.
             // ie. class_alias is a function that was introduced in PHP 5.3
             if (extension_loaded('mcrypt') && function_exists('class_alias')) {
-                return @mcrypt_create_iv($length);
+                return mcrypt_create_iv($length);
             }
             // method 2. openssl_random_pseudo_bytes was introduced in PHP 5.3.0 but prior to PHP 5.3.4 there was,
             // to quote <http://php.net/ChangeLog-5.php#5.3.4>, "possible blocking behavior". as of 5.3.4
@@ -95,10 +92,7 @@ class Random
             }
             if ($fp !== true && $fp !== false) {
                 // surprisingly faster than !is_bool() or is_resource()
-                $temp = fread($fp, $length);
-                if (strlen($temp) == $length) {
-                    return $temp;
-                }
+                return fread($fp, $length);
             }
             // method 3. pretty much does the same thing as method 2 per the following url:
             // https://github.com/php/php-src/blob/7014a0eb6d1611151a286c0ff4f2238f92c120d6/ext/mcrypt/mcrypt.c#L1391
@@ -106,7 +100,7 @@ class Random
             // not doing. regardless, this'll only be called if this PHP script couldn't open /dev/urandom due to open_basedir
             // restrictions or some such
             if (extension_loaded('mcrypt')) {
-                return @mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
+                return mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
             }
         }
         // at this point we have no choice but to use a pure-PHP CSPRNG
@@ -235,8 +229,8 @@ if (!function_exists('phpseclib_safe_serialize')) {
      */
     function phpseclib_safe_serialize(&$arr)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("phpseclib_safe_serialize") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpseclib/phpseclib/phpseclib/Crypt/Random.php at line 238")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called phpseclib_safe_serialize:238@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpseclib/phpseclib/phpseclib/Crypt/Random.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("phpseclib_safe_serialize") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpseclib/phpseclib/phpseclib/Crypt/Random.php at line 249")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called phpseclib_safe_serialize:249@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpseclib/phpseclib/phpseclib/Crypt/Random.php');
         die();
     }
 }

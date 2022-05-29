@@ -8,9 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Doubler;
 
 use ReflectionClass;
+
 /**
  * Name generator.
  * Generates classname for double.
@@ -20,6 +22,7 @@ use ReflectionClass;
 class NameGenerator
 {
     private static $counter = 1;
+
     /**
      * Generates name.
      *
@@ -31,6 +34,7 @@ class NameGenerator
     public function name(ReflectionClass $class = null, array $interfaces)
     {
         $parts = array();
+
         if (null !== $class) {
             $parts[] = $class->getName();
         } else {
@@ -38,9 +42,11 @@ class NameGenerator
                 $parts[] = $interface->getShortName();
             }
         }
+
         if (!count($parts)) {
             $parts[] = 'stdClass';
         }
-        return sprintf('Double\\%s\\P%d', implode('\\', $parts), self::$counter++);
+
+        return sprintf('Double\%s\P%d', implode('\\', $parts), self::$counter++);
     }
 }

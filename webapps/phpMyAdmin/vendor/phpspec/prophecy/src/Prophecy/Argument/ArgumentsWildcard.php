@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Argument;
 
 /**
@@ -22,6 +23,7 @@ class ArgumentsWildcard
      */
     private $tokens = array();
     private $string;
+
     /**
      * Initializes wildcard.
      *
@@ -33,9 +35,11 @@ class ArgumentsWildcard
             if (!$argument instanceof Token\TokenInterface) {
                 $argument = new Token\ExactValueToken($argument);
             }
+
             $this->tokens[] = $argument;
         }
     }
+
     /**
      * Calculates wildcard match score for provided arguments.
      *
@@ -48,23 +52,29 @@ class ArgumentsWildcard
         if (0 == count($arguments) && 0 == count($this->tokens)) {
             return 1;
         }
-        $arguments = array_values($arguments);
+
+        $arguments  = array_values($arguments);
         $totalScore = 0;
         foreach ($this->tokens as $i => $token) {
             $argument = isset($arguments[$i]) ? $arguments[$i] : null;
-            if (1 >= ($score = $token->scoreArgument($argument))) {
+            if (1 >= $score = $token->scoreArgument($argument)) {
                 return false;
             }
+
             $totalScore += $score;
+
             if (true === $token->isLast()) {
                 return $totalScore;
             }
         }
+
         if (count($arguments) > count($this->tokens)) {
             return false;
         }
+
         return $totalScore;
     }
+
     /**
      * Returns string representation for wildcard.
      *
@@ -77,8 +87,10 @@ class ArgumentsWildcard
                 return (string) $token;
             }, $this->tokens));
         }
+
         return $this->string;
     }
+
     /**
      * @return array
      */

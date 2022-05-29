@@ -19,25 +19,27 @@ use Symfony\Component\Console\Exception\LogicException;
  */
 class InputOption
 {
-    public const VALUE_NONE = 1;
-    public const VALUE_REQUIRED = 2;
-    public const VALUE_OPTIONAL = 4;
-    public const VALUE_IS_ARRAY = 8;
+    const VALUE_NONE = 1;
+    const VALUE_REQUIRED = 2;
+    const VALUE_OPTIONAL = 4;
+    const VALUE_IS_ARRAY = 8;
     private $name;
     private $shortcut;
     private $mode;
     private $default;
     private $description;
     /**
-     * @param string                        $name        The option name
-     * @param string|array|null             $shortcut    The shortcuts, can be null, a string of shortcuts delimited by | or an array of shortcuts
-     * @param int|null                      $mode        The option mode: One of the VALUE_* constants
-     * @param string                        $description A description text
-     * @param string|string[]|int|bool|null $default     The default value (must be null for self::VALUE_NONE)
+     * Constructor.
+     *
+     * @param string       $name        The option name
+     * @param string|array $shortcut    The shortcuts, can be null, a string of shortcuts delimited by | or an array of shortcuts
+     * @param int          $mode        The option mode: One of the VALUE_* constants
+     * @param string       $description A description text
+     * @param mixed        $default     The default value (must be null for self::VALUE_NONE)
      *
      * @throws InvalidArgumentException If option mode is invalid or incompatible
      */
-    public function __construct(string $name, $shortcut = null, int $mode = null, string $description = '', $default = null)
+    public function __construct($name, $shortcut = null, $mode = null, $description = '', $default = null)
     {
         if (0 === strpos($name, '--')) {
             $name = substr($name, 2);
@@ -49,7 +51,7 @@ class InputOption
             $shortcut = null;
         }
         if (null !== $shortcut) {
-            if (\is_array($shortcut)) {
+            if (is_array($shortcut)) {
                 $shortcut = implode('|', $shortcut);
             }
             $shortcuts = preg_split('{(\\|)-?}', ltrim($shortcut, '-'));
@@ -61,7 +63,7 @@ class InputOption
         }
         if (null === $mode) {
             $mode = self::VALUE_NONE;
-        } elseif ($mode > 15 || $mode < 1) {
+        } elseif (!is_int($mode) || $mode > 15 || $mode < 1) {
             throw new InvalidArgumentException(sprintf('Option mode "%s" is not valid.', $mode));
         }
         $this->name = $name;
@@ -76,7 +78,7 @@ class InputOption
     /**
      * Returns the option shortcut.
      *
-     * @return string|null The shortcut
+     * @return string The shortcut
      */
     public function getShortcut()
     {
@@ -130,7 +132,7 @@ class InputOption
     /**
      * Sets the default value.
      *
-     * @param string|string[]|int|bool|null $default The default value
+     * @param mixed $default The default value
      *
      * @throws LogicException When incorrect default value is given
      */
@@ -141,8 +143,8 @@ class InputOption
         }
         if ($this->isArray()) {
             if (null === $default) {
-                $default = [];
-            } elseif (!\is_array($default)) {
+                $default = array();
+            } elseif (!is_array($default)) {
                 throw new LogicException('A default value for an array option must be an array.');
             }
         }
@@ -151,7 +153,7 @@ class InputOption
     /**
      * Returns the default value.
      *
-     * @return string|string[]|int|bool|null The default value
+     * @return mixed The default value
      */
     public function getDefault()
     {
@@ -169,9 +171,11 @@ class InputOption
     /**
      * Checks whether the given option equals this one.
      *
+     * @param InputOption $option option to compare
+     *
      * @return bool
      */
-    public function equals(self $option)
+    public function equals(InputOption $option)
     {
         return $option->getName() === $this->getName() && $option->getShortcut() === $this->getShortcut() && $option->getDefault() === $this->getDefault() && $option->isArray() === $this->isArray() && $option->isValueRequired() === $this->isValueRequired() && $option->isValueOptional() === $this->isValueOptional();
     }

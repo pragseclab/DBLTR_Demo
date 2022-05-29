@@ -33,7 +33,7 @@ class DebugFormatterHelper extends Helper
      */
     public function start($id, $message, $prefix = 'RUN')
     {
-        $this->started[$id] = ['border' => ++$this->count % \count($this->colors)];
+        $this->started[$id] = array('border' => ++$this->count % count($this->colors));
         return sprintf("%s<bg=blue;fg=white> %s </> <fg=blue>%s</>\n", $this->getBorder($id), $prefix, $message);
     }
     /**
@@ -93,7 +93,12 @@ class DebugFormatterHelper extends Helper
         unset($this->started[$id]['out'], $this->started[$id]['err']);
         return $message;
     }
-    private function getBorder(string $id) : string
+    /**
+     * @param string $id The id of the formatting session
+     *
+     * @return string
+     */
+    private function getBorder($id)
     {
         return sprintf('<bg=%s> </>', $this->colors[$this->started[$id]['border']]);
     }

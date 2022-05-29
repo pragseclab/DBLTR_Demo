@@ -108,7 +108,7 @@ class TCPDF2DBarcode
     public function getBarcodeSVGcode($w = 3, $h = 3, $color = 'black')
     {
         // replace table for special characters
-        $repstr = array("\x00" => '', '&' => '&amp;', '<' => '&lt;', '>' => '&gt;');
+        $repstr = array("\0" => '', '&' => '&amp;', '<' => '&lt;', '>' => '&gt;');
         $svg = '<' . '?' . 'xml version="1.0" standalone="no"' . '?' . '>' . "\n";
         $svg .= '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">' . "\n";
         $svg .= '<svg width="' . round($this->barcode_array['num_cols'] * $w, 3) . '" height="' . round($this->barcode_array['num_rows'] * $h, 3) . '" version="1.1" xmlns="http://www.w3.org/2000/svg">' . "\n";
@@ -282,12 +282,12 @@ class TCPDF2DBarcode
                 if (isset($mode[3]) and $mode[3] !== '' and isset($mode[4]) and $mode[4] !== '' and isset($mode[5]) and $mode[5] !== '') {
                     $macro['segment_total'] = intval($mode[3]);
                     $macro['segment_index'] = intval($mode[4]);
-                    $macro['file_id'] = strtr($mode[5], "\xff", ',');
+                    $macro['file_id'] = strtr($mode[5], "ÿ", ',');
                     for ($i = 0; $i < 7; ++$i) {
                         $o = $i + 6;
                         if (isset($mode[$o]) and $mode[$o] !== '') {
                             // add option
-                            $macro['option_' . $i] = strtr($mode[$o], "\xff", ',');
+                            $macro['option_' . $i] = strtr($mode[$o], "ÿ", ',');
                         }
                     }
                 }

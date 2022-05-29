@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of PHPUnit.
  *
@@ -8,20 +7,26 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace PHPUnit\Framework\Constraint;
 
-use PHPUnit\Framework\ExpectationFailedException;
-abstract class Composite extends Constraint
+/**
+ * @since Class available since Release 3.1.0
+ */
+abstract class PHPUnit_Framework_Constraint_Composite extends PHPUnit_Framework_Constraint
 {
     /**
-     * @var Constraint
+     * @var PHPUnit_Framework_Constraint
      */
-    private $innerConstraint;
-    public function __construct(Constraint $innerConstraint)
+    protected $innerConstraint;
+
+    /**
+     * @param PHPUnit_Framework_Constraint $innerConstraint
+     */
+    public function __construct(PHPUnit_Framework_Constraint $innerConstraint)
     {
         parent::__construct();
         $this->innerConstraint = $innerConstraint;
     }
+
     /**
      * Evaluates the constraint for parameter $other
      *
@@ -32,30 +37,34 @@ abstract class Composite extends Constraint
      * a boolean value instead: true in case of success, false in case of a
      * failure.
      *
-     * @param mixed  $other        value or object to evaluate
+     * @param mixed  $other        Value or object to evaluate.
      * @param string $description  Additional information about the test
      * @param bool   $returnResult Whether to return a result or throw an exception
      *
-     * @throws ExpectationFailedException
-     * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
+     * @return mixed
+     *
+     * @throws PHPUnit_Framework_ExpectationFailedException
      */
     public function evaluate($other, $description = '', $returnResult = false)
     {
         try {
-            return $this->innerConstraint->evaluate($other, $description, $returnResult);
-        } catch (ExpectationFailedException $e) {
-            $this->fail($other, $description, $e->getComparisonFailure());
+            return $this->innerConstraint->evaluate(
+                $other,
+                $description,
+                $returnResult
+            );
+        } catch (PHPUnit_Framework_ExpectationFailedException $e) {
+            $this->fail($other, $description);
         }
     }
+
     /**
      * Counts the number of constraint elements.
+     *
+     * @return int
      */
-    public function count() : int
+    public function count()
     {
-        return \count($this->innerConstraint);
-    }
-    protected function innerConstraint() : Constraint
-    {
-        return $this->innerConstraint;
+        return count($this->innerConstraint);
     }
 }

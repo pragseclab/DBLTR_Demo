@@ -3,17 +3,17 @@
 /**
  * Defines an array of tokens and utility functions to iterate through it.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser;
 
-use ArrayAccess;
-use function count;
-use function is_array;
-use function is_string;
 /**
  * A structure representing a list of tokens.
+ *
+ * @category Tokens
+ *
+ * @license  https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
-class TokensList implements ArrayAccess
+class TokensList implements \ArrayAccess
 {
     /**
      * The array of tokens.
@@ -21,19 +21,24 @@ class TokensList implements ArrayAccess
      * @var array
      */
     public $tokens = array();
+
     /**
      * The count of tokens.
      *
      * @var int
      */
     public $count = 0;
+
     /**
      * The index of the next token to be returned.
      *
      * @var int
      */
     public $idx = 0;
+
     /**
+     * Constructor.
+     *
      * @param array $tokens the initial array of tokens
      * @param int   $count  the count of tokens in the initial array
      */
@@ -46,6 +51,7 @@ class TokensList implements ArrayAccess
             }
         }
     }
+
     /**
      * Builds an array of tokens by merging their raw value.
      *
@@ -58,17 +64,21 @@ class TokensList implements ArrayAccess
         if (is_string($list)) {
             return $list;
         }
+
         if ($list instanceof self) {
             $list = $list->tokens;
         }
+
         $ret = '';
         if (is_array($list)) {
             foreach ($list as $tok) {
                 $ret .= $tok->token;
             }
         }
+
         return $ret;
     }
+
     /**
      * Adds a new token.
      *
@@ -78,27 +88,32 @@ class TokensList implements ArrayAccess
     {
         $this->tokens[$this->count++] = $token;
     }
+
     /**
      * Gets the next token. Skips any irrelevant token (whitespaces and
      * comments).
      *
-     * @return Token|null
+     * @return Token
      */
     public function getNext()
     {
         for (; $this->idx < $this->count; ++$this->idx) {
-            if ($this->tokens[$this->idx]->type !== Token::TYPE_WHITESPACE && $this->tokens[$this->idx]->type !== Token::TYPE_COMMENT) {
+            if (($this->tokens[$this->idx]->type !== Token::TYPE_WHITESPACE)
+                && ($this->tokens[$this->idx]->type !== Token::TYPE_COMMENT)
+            ) {
                 return $this->tokens[$this->idx++];
             }
         }
+
         return null;
     }
+
     /**
      * Gets the next token.
      *
      * @param int $type the type
      *
-     * @return Token|null
+     * @return Token
      */
     public function getNextOfType($type)
     {
@@ -107,25 +122,31 @@ class TokensList implements ArrayAccess
                 return $this->tokens[$this->idx++];
             }
         }
+
         return null;
     }
+
     /**
      * Gets the next token.
      *
      * @param int    $type  the type of the token
      * @param string $value the value of the token
      *
-     * @return Token|null
+     * @return Token
      */
     public function getNextOfTypeAndValue($type, $value)
     {
         for (; $this->idx < $this->count; ++$this->idx) {
-            if ($this->tokens[$this->idx]->type === $type && $this->tokens[$this->idx]->value === $value) {
+            if (($this->tokens[$this->idx]->type === $type)
+                && ($this->tokens[$this->idx]->value === $value)
+            ) {
                 return $this->tokens[$this->idx++];
             }
         }
+
         return null;
     }
+
     /**
      * Sets an value inside the container.
      *
@@ -140,6 +161,7 @@ class TokensList implements ArrayAccess
             $this->tokens[$offset] = $value;
         }
     }
+
     /**
      * Gets a value from the container.
      *
@@ -151,6 +173,7 @@ class TokensList implements ArrayAccess
     {
         return $offset < $this->count ? $this->tokens[$offset] : null;
     }
+
     /**
      * Checks if an offset was previously set.
      *
@@ -162,6 +185,7 @@ class TokensList implements ArrayAccess
     {
         return $offset < $this->count;
     }
+
     /**
      * Unsets the value of an offset.
      *

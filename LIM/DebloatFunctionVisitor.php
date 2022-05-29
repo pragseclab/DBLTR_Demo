@@ -41,7 +41,7 @@ class DebloatFunctionVisitor extends NodeVisitorAbstract {
              // First executed line inside PMA_langDetails is line 200
              // So have to check if any line within the function was executed and not only the first one
              $firstStatementLines = range($node->stmts[0]->getStartLine(), $node->getEndLine());
-             if (count(array_intersect($firstStatementLines, $this->debloat_function_lines)) > 0) {
+             if (count(array_intersect($firstStatementLines, $this->debloat_function_lines)) > 0 || $functions_signature === '__destruct()') {
                // Update Database
                echo 'Function is covered ' . $this->file_name . ':' . $node->stmts[0]->getStartLine() . ':' . $functions_signature . '<br />';
              }

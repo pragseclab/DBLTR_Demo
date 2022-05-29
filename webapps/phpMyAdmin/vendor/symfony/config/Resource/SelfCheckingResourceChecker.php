@@ -8,9 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Symfony\Component\Config\Resource;
 
 use Symfony\Component\Config\ResourceCheckerInterface;
+
 /**
  * Resource checker for instances of SelfCheckingResourceInterface.
  *
@@ -25,6 +27,7 @@ class SelfCheckingResourceChecker implements ResourceCheckerInterface
     {
         return $metadata instanceof SelfCheckingResourceInterface;
     }
+
     public function isFresh(ResourceInterface $resource, $timestamp)
     {
         /* @var SelfCheckingResourceInterface $resource */

@@ -8,9 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Argument\Token;
 
 use Prophecy\Util\StringUtil;
+
 /**
  * Identical value token.
  *
@@ -21,6 +23,7 @@ class IdenticalValueToken implements TokenInterface
     private $value;
     private $string;
     private $util;
+
     /**
      * Initializes token.
      *
@@ -30,8 +33,9 @@ class IdenticalValueToken implements TokenInterface
     public function __construct($value, StringUtil $util = null)
     {
         $this->value = $value;
-        $this->util = $util ?: new StringUtil();
+        $this->util  = $util ?: new StringUtil();
     }
+
     /**
      * Scores 11 if argument matches preset value.
      *
@@ -43,6 +47,7 @@ class IdenticalValueToken implements TokenInterface
     {
         return $argument === $this->value ? 11 : false;
     }
+
     /**
      * Returns false.
      *
@@ -52,6 +57,7 @@ class IdenticalValueToken implements TokenInterface
     {
         return false;
     }
+
     /**
      * Returns string representation for token.
      *
@@ -62,6 +68,7 @@ class IdenticalValueToken implements TokenInterface
         if (null === $this->string) {
             $this->string = sprintf('identical(%s)', $this->util->stringify($this->value));
         }
+
         return $this->string;
     }
 }

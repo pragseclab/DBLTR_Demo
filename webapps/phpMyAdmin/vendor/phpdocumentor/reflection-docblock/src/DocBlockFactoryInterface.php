@@ -1,5 +1,4 @@
 <?php
-
 namespace phpDocumentor\Reflection;
 
 interface DocBlockFactoryInterface
@@ -11,7 +10,8 @@ interface DocBlockFactoryInterface
      *
      * @return DocBlockFactory
      */
-    public static function createInstance(array $additionalTags = array());
+    public static function createInstance(array $additionalTags = []);
+
     /**
      * @param string $docblock
      * @param Types\Context $context

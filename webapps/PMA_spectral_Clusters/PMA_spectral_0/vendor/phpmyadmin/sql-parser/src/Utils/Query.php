@@ -3,7 +3,6 @@
 /**
  * Statement utilities.
  */
-declare (strict_types=1);
 namespace PhpMyAdmin\SqlParser\Utils;
 
 use PhpMyAdmin\SqlParser\Components\Expression;
@@ -26,30 +25,26 @@ use PhpMyAdmin\SqlParser\Statements\RenameStatement;
 use PhpMyAdmin\SqlParser\Statements\RepairStatement;
 use PhpMyAdmin\SqlParser\Statements\ReplaceStatement;
 use PhpMyAdmin\SqlParser\Statements\SelectStatement;
-use PhpMyAdmin\SqlParser\Statements\SetStatement;
 use PhpMyAdmin\SqlParser\Statements\ShowStatement;
 use PhpMyAdmin\SqlParser\Statements\TruncateStatement;
 use PhpMyAdmin\SqlParser\Statements\UpdateStatement;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function array_flip;
-use function array_keys;
-use function count;
-use function in_array;
-use function is_string;
-use function trim;
 /**
  * Statement utilities.
+ *
+ * @category   Statement
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class Query
 {
     /**
      * Functions that set the flag `is_func`.
      *
-     * @var string[]
+     * @var array
      */
     public static $FUNCTIONS = array('SUM', 'AVG', 'STD', 'STDDEV', 'MIN', 'MAX', 'BIT_OR', 'BIT_AND');
-    /** @var array<string,false> */
     public static $ALLFLAGS = array(
         /*
          * select ... DISTINCT ...
@@ -112,7 +107,7 @@ class Query
          * or
          * REPLACE ...
          * or
-         * LOAD DATA ...
+         * TODO: LOAD DATA ...
          */
         'is_insert' => false,
         /*
@@ -192,7 +187,7 @@ class Query
      *
      * @return array
      */
-    private static function getFlagsSelect($statement, $flags)
+    private static function _getFlagsSelect($statement, $flags)
     {
         $flags['querytype'] = 'SELECT';
         $flags['is_select'] = true;
@@ -253,7 +248,7 @@ class Query
      */
     public static function getFlags($statement, $all = false)
     {
-        $flags = ['querytype' => false];
+        $flags = array();
         if ($all) {
             $flags = self::$ALLFLAGS;
         }
@@ -308,15 +303,13 @@ class Query
             $flags['is_replace'] = true;
             $flags['is_insert'] = true;
         } elseif ($statement instanceof SelectStatement) {
-            $flags = self::getFlagsSelect($statement, $flags);
+            $flags = self::_getFlagsSelect($statement, $flags);
         } elseif ($statement instanceof ShowStatement) {
             $flags['querytype'] = 'SHOW';
             $flags['is_show'] = true;
         } elseif ($statement instanceof UpdateStatement) {
             $flags['querytype'] = 'UPDATE';
             $flags['is_affected'] = true;
-        } elseif ($statement instanceof SetStatement) {
-            $flags['querytype'] = 'SET';
         }
         if ($statement instanceof SelectStatement || $statement instanceof UpdateStatement || $statement instanceof DeleteStatement) {
             if (!empty($statement->limit)) {
@@ -354,13 +347,13 @@ class Query
         $ret['parser'] = $parser;
         $ret['statement'] = $statement;
         if ($statement instanceof SelectStatement) {
-            $ret['select_tables'] = [];
-            $ret['select_expr'] = [];
+            $ret['select_tables'] = array();
+            $ret['select_expr'] = array();
             // Finding tables' aliases and their associated real names.
-            $tableAliases = [];
+            $tableAliases = array();
             foreach ($statement->from as $expr) {
-                if (isset($expr->table, $expr->alias) && $expr->table !== '' && $expr->alias !== '') {
-                    $tableAliases[$expr->alias] = [$expr->table, $expr->database ?? null];
+                if (isset($expr->table) && $expr->table !== '' && isset($expr->alias) && $expr->alias !== '') {
+                    $tableAliases[$expr->alias] = array($expr->table, isset($expr->database) ? $expr->database : null);
                 }
             }
             // Trying to find selected tables only from the select expression.
@@ -371,7 +364,7 @@ class Query
                     if (isset($tableAliases[$expr->table])) {
                         $arr = $tableAliases[$expr->table];
                     } else {
-                        $arr = [$expr->table, isset($expr->database) && $expr->database !== '' ? $expr->database : null];
+                        $arr = array($expr->table, isset($expr->database) && $expr->database !== '' ? $expr->database : null);
                     }
                     if (!in_array($arr, $ret['select_tables'])) {
                         $ret['select_tables'][] = $arr;
@@ -386,7 +379,7 @@ class Query
             if (empty($ret['select_tables'])) {
                 foreach ($statement->from as $expr) {
                     if (isset($expr->table) && $expr->table !== '') {
-                        $arr = [$expr->table, isset($expr->database) && $expr->database !== '' ? $expr->database : null];
+                        $arr = array($expr->table, isset($expr->database) && $expr->database !== '' ? $expr->database : null);
                         if (!in_array($arr, $ret['select_tables'])) {
                             $ret['select_tables'][] = $arr;
                         }
@@ -405,8 +398,8 @@ class Query
      */
     public static function getTables($statement)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("getTables") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php at line 408")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called getTables:408@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("getTables") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php at line 478")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called getTables:478@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php');
         die();
     }
     /**
@@ -470,9 +463,9 @@ class Query
          *
          * @var int
          */
-        $clauseIdx = $clauses[$clauseType] ?? -1;
+        $clauseIdx = $clauses[$clauseType];
         $firstClauseIdx = $clauseIdx;
-        $lastClauseIdx = $clauseIdx;
+        $lastClauseIdx = $clauseIdx + 1;
         // Determining the behavior of this function.
         if ($type === -1) {
             $firstClauseIdx = -1;
@@ -482,7 +475,7 @@ class Query
             $firstClauseIdx = $clauseIdx + 1;
             $lastClauseIdx = 10000;
             // Something big enough.
-        } elseif (is_string($type) && isset($clauses[$type])) {
+        } elseif (is_string($type)) {
             if ($clauses[$type] > $clauseIdx) {
                 $firstClauseIdx = $clauseIdx + 1;
                 $lastClauseIdx = $clauses[$type] - 1;
@@ -507,11 +500,11 @@ class Query
                     --$brackets;
                 }
             }
-            if ($brackets === 0) {
+            if ($brackets == 0) {
                 // Checking if the section was changed.
                 if ($token->type === Token::TYPE_KEYWORD && isset($clauses[$token->keyword]) && $clauses[$token->keyword] >= $currIdx) {
                     $currIdx = $clauses[$token->keyword];
-                    if ($skipFirst && $currIdx === $clauseIdx) {
+                    if ($skipFirst && $currIdx == $clauseIdx) {
                         // This token is skipped (not added to the old
                         // clause) because it will be replaced.
                         continue;
@@ -559,15 +552,15 @@ class Query
      * @param Statement  $statement the parsed query that has to be modified
      * @param TokensList $list      the list of tokens
      * @param array      $ops       Clauses to be replaced. Contains multiple
-     *                              arrays having two values: [$old, $new].
+     *                              arrays having two values: array($old, $new).
      *                              Clauses must be sorted.
      *
      * @return string
      */
     public static function replaceClauses($statement, $list, array $ops)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("replaceClauses") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php at line 597")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called replaceClauses:597@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("replaceClauses") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php at line 699")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called replaceClauses:699@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php');
         die();
     }
     /**
@@ -582,8 +575,8 @@ class Query
      */
     public static function getFirstStatement($query, $delimiter = null)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("getFirstStatement") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php at line 637")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called getFirstStatement:637@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("getFirstStatement") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php at line 754")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called getFirstStatement:754@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Utils/Query.php');
         die();
     }
     /**
@@ -622,7 +615,7 @@ class Query
                     --$brackets;
                 }
             }
-            if ($brackets === 0) {
+            if ($brackets == 0) {
                 if ($token->type === Token::TYPE_KEYWORD && isset($clauses[$token->keyword]) && $clause === $token->keyword) {
                     return $i;
                 } elseif ($token->keyword === 'UNION') {

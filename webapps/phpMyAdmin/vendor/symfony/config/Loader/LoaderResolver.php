@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Symfony\Component\Config\Loader;
 
 /**
@@ -24,7 +25,10 @@ class LoaderResolver implements LoaderResolverInterface
      * @var LoaderInterface[] An array of LoaderInterface objects
      */
     private $loaders = array();
+
     /**
+     * Constructor.
+     *
      * @param LoaderInterface[] $loaders An array of loaders
      */
     public function __construct(array $loaders = array())
@@ -33,6 +37,7 @@ class LoaderResolver implements LoaderResolverInterface
             $this->addLoader($loader);
         }
     }
+
     /**
      * {@inheritdoc}
      */
@@ -43,13 +48,21 @@ class LoaderResolver implements LoaderResolverInterface
                 return $loader;
             }
         }
+
         return false;
     }
+
+    /**
+     * Adds a loader.
+     *
+     * @param LoaderInterface $loader A LoaderInterface instance
+     */
     public function addLoader(LoaderInterface $loader)
     {
         $this->loaders[] = $loader;
         $loader->setResolver($this);
     }
+
     /**
      * Returns the registered loaders.
      *

@@ -1,7 +1,5 @@
 <?php
-
-use PHPUnit\Framework\TestCase;
-class NotExistingCoveredElementTest extends TestCase
+class NotExistingCoveredElementTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @covers NotExistingClass
@@ -9,12 +7,14 @@ class NotExistingCoveredElementTest extends TestCase
     public function testOne()
     {
     }
+
     /**
      * @covers NotExistingClass::notExistingMethod
      */
     public function testTwo()
     {
     }
+
     /**
      * @covers NotExistingClass::<public>
      */

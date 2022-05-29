@@ -1,6 +1,5 @@
 <?php
 
-declare (strict_types=1);
 /*
     Copyright (c) 2005 Steven Armstrong <sa at c-area dot ch>
     Copyright (c) 2009 Danilo Segan <danilo@kvota.net>
@@ -31,7 +30,7 @@ use PhpMyAdmin\MoTranslator\Loader;
  *
  * @return string Set or current locale
  */
-function _setlocale(int $category, string $locale) : string
+function _setlocale($category, $locale)
 {
     return Loader::getInstance()->setlocale($locale);
 }
@@ -41,30 +40,26 @@ function _setlocale(int $category, string $locale) : string
  * @param string $domain Domain name
  * @param string $path   Path where to find locales
  */
-function _bindtextdomain(string $domain, string $path) : void
+function _bindtextdomain($domain, $path)
 {
     Loader::getInstance()->bindtextdomain($domain, $path);
 }
 /**
  * Dummy compatibility function, MoTranslator assumes
- * everything is using same character set on input and
- * output.
- *
- * Generally it is wise to output in UTF-8 and have
- * mo files in UTF-8.
- *
- * @param string $domain  Domain where to set character set
- * @param string $codeset Character set to set
+ * everything is UTF-8.
  */
-function _bind_textdomain_codeset($domain, $codeset) : void
+function _bind_textdomain_codeset($domain, $codeset)
 {
+    echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("_bind_textdomain_codeset") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php at line 56")                </p>            </div>        </div>    </div></body></html>');
+    error_log('Removed function called _bind_textdomain_codeset:56@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php');
+    die();
 }
 /**
  * Sets the default domain.
  *
  * @param string $domain Domain name
  */
-function _textdomain(string $domain) : void
+function _textdomain($domain)
 {
     Loader::getInstance()->textdomain($domain);
 }
@@ -75,9 +70,11 @@ function _textdomain(string $domain) : void
  *
  * @return string translated string (or original, if not found)
  */
-function _gettext(string $msgid) : string
+function _gettext($msgid)
 {
-    return Loader::getInstance()->getTranslator()->gettext($msgid);
+    echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("_gettext") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php at line 78")                </p>            </div>        </div>    </div></body></html>');
+    error_log('Removed function called _gettext:78@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php');
+    die();
 }
 /**
  * Translates a string, alias for _gettext.
@@ -86,7 +83,7 @@ function _gettext(string $msgid) : string
  *
  * @return string translated string (or original, if not found)
  */
-function __(string $msgid) : string
+function __($msgid)
 {
     return Loader::getInstance()->getTranslator()->gettext($msgid);
 }
@@ -99,7 +96,7 @@ function __(string $msgid) : string
  *
  * @return string translated plural form
  */
-function _ngettext(string $msgid, string $msgidPlural, int $number) : string
+function _ngettext($msgid, $msgidPlural, $number)
 {
     return Loader::getInstance()->getTranslator()->ngettext($msgid, $msgidPlural, $number);
 }
@@ -111,7 +108,7 @@ function _ngettext(string $msgid, string $msgidPlural, int $number) : string
  *
  * @return string translated plural form
  */
-function _pgettext(string $msgctxt, string $msgid) : string
+function _pgettext($msgctxt, $msgid)
 {
     return Loader::getInstance()->getTranslator()->pgettext($msgctxt, $msgid);
 }
@@ -125,10 +122,10 @@ function _pgettext(string $msgctxt, string $msgid) : string
  *
  * @return string translated plural form
  */
-function _npgettext(string $msgctxt, string $msgid, string $msgidPlural, int $number) : string
+function _npgettext($msgctxt, $msgid, $msgidPlural, $number)
 {
-    echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("_npgettext") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php at line 130")                </p>            </div>        </div>    </div></body></html>');
-    error_log('Removed function called _npgettext:130@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php');
+    echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("_npgettext") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php at line 140")                </p>            </div>        </div>    </div></body></html>');
+    error_log('Removed function called _npgettext:140@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php');
     die();
 }
 /**
@@ -139,10 +136,10 @@ function _npgettext(string $msgctxt, string $msgid, string $msgidPlural, int $nu
  *
  * @return string translated string (or original, if not found)
  */
-function _dgettext(string $domain, string $msgid) : string
+function _dgettext($domain, $msgid)
 {
-    echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("_dgettext") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php at line 142")                </p>            </div>        </div>    </div></body></html>');
-    error_log('Removed function called _dgettext:142@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php');
+    echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("_dgettext") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php at line 155")                </p>            </div>        </div>    </div></body></html>');
+    error_log('Removed function called _dgettext:155@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php');
     die();
 }
 /**
@@ -155,10 +152,10 @@ function _dgettext(string $domain, string $msgid) : string
  *
  * @return string translated plural form
  */
-function _dngettext(string $domain, string $msgid, string $msgidPlural, int $number) : string
+function _dngettext($domain, $msgid, $msgidPlural, $number)
 {
-    echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("_dngettext") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php at line 156")                </p>            </div>        </div>    </div></body></html>');
-    error_log('Removed function called _dngettext:156@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php');
+    echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("_dngettext") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php at line 172")                </p>            </div>        </div>    </div></body></html>');
+    error_log('Removed function called _dngettext:172@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php');
     die();
 }
 /**
@@ -170,10 +167,10 @@ function _dngettext(string $domain, string $msgid, string $msgidPlural, int $num
  *
  * @return string translated plural form
  */
-function _dpgettext(string $domain, string $msgctxt, string $msgid) : string
+function _dpgettext($domain, $msgctxt, $msgid)
 {
-    echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("_dpgettext") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php at line 169")                </p>            </div>        </div>    </div></body></html>');
-    error_log('Removed function called _dpgettext:169@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php');
+    echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("_dpgettext") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php at line 188")                </p>            </div>        </div>    </div></body></html>');
+    error_log('Removed function called _dpgettext:188@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php');
     die();
 }
 /**
@@ -187,7 +184,9 @@ function _dpgettext(string $domain, string $msgctxt, string $msgid) : string
  *
  * @return string translated plural form
  */
-function _dnpgettext(string $domain, string $msgctxt, string $msgid, string $msgidPlural, int $number) : string
+function _dnpgettext($domain, $msgctxt, $msgid, $msgidPlural, $number)
 {
-    return Loader::getInstance()->getTranslator($domain)->npgettext($msgctxt, $msgid, $msgidPlural, $number);
+    echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("_dnpgettext") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php at line 206")                </p>            </div>        </div>    </div></body></html>');
+    error_log('Removed function called _dnpgettext:206@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/motranslator/src/functions.php');
+    die();
 }

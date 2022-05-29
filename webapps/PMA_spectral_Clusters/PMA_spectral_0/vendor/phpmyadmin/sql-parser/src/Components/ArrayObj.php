@@ -3,19 +3,18 @@
 /**
  * Parses an array.
  */
-declare (strict_types=1);
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function implode;
-use function is_array;
-use function strlen;
-use function trim;
 /**
  * Parses an array.
+ *
+ * @category   Components
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class ArrayObj extends Component
 {
@@ -32,6 +31,8 @@ class ArrayObj extends Component
      */
     public $values = array();
     /**
+     * Constructor.
+     *
      * @param array $raw    the unprocessed values
      * @param array $values the processed values
      */
@@ -49,7 +50,7 @@ class ArrayObj extends Component
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = empty($options['type']) ? new static() : [];
+        $ret = empty($options['type']) ? new self() : array();
         /**
          * The last raw expression.
          *
@@ -122,18 +123,19 @@ class ArrayObj extends Component
                 $lastRaw .= $token->token;
                 $lastValue .= $token->value;
             } else {
-                $ret[] = $options['type']::parse($parser, $list, empty($options['typeOptions']) ? [] : $options['typeOptions']);
+                $ret[] = $options['type']::parse($parser, $list, empty($options['typeOptions']) ? array() : $options['typeOptions']);
             }
         }
         // Handling last element.
         //
         // This is treated differently to treat the following cases:
         //
-        //           => []
-        //      [,]  => ['', '']
-        //      []   => []
-        //      [a,] => ['a', '']
-        //      [a]  => ['a']
+        //           => array()
+        //      (,)  => array('', '')
+        //      ()   => array()
+        //      (a,) => array('a', '')
+        //      (a)  => array('a')
+        //
         $lastRaw = trim($lastRaw);
         if (empty($options['type']) && (strlen($lastRaw) > 0 || $isCommaLast)) {
             $ret->raw[] = $lastRaw;
@@ -149,8 +151,8 @@ class ArrayObj extends Component
      */
     public static function build($component, array $options = array())
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("build") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/ArrayObj.php at line 152")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called build:152@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/ArrayObj.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("build") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/ArrayObj.php at line 181")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called build:181@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/ArrayObj.php');
         die();
     }
 }

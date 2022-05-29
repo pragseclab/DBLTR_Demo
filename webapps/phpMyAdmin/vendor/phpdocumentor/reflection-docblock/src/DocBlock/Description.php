@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This file is part of phpDocumentor.
  *
@@ -10,11 +9,13 @@
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @link      http://phpdoc.org
  */
+
 namespace phpDocumentor\Reflection\DocBlock;
 
 use phpDocumentor\Reflection\DocBlock\Tags\Formatter;
 use phpDocumentor\Reflection\DocBlock\Tags\Formatter\PassthroughFormatter;
 use Webmozart\Assert\Assert;
+
 /**
  * Object representing to description for a DocBlock.
  *
@@ -51,29 +52,24 @@ class Description
 {
     /** @var string */
     private $bodyTemplate;
+
     /** @var Tag[] */
     private $tags;
+
     /**
      * Initializes a Description with its body (template) and a listing of the tags used in the body template.
      *
      * @param string $bodyTemplate
      * @param Tag[] $tags
      */
-    public function __construct($bodyTemplate, array $tags = array())
+    public function __construct($bodyTemplate, array $tags = [])
     {
         Assert::string($bodyTemplate);
+
         $this->bodyTemplate = $bodyTemplate;
         $this->tags = $tags;
     }
-    /**
-     * Returns the tags for this DocBlock.
-     *
-     * @return Tag[]
-     */
-    public function getTags()
-    {
-        return $this->tags;
-    }
+
     /**
      * Renders this description as a string where the provided formatter will format the tags in the expected string
      * format.
@@ -87,12 +83,14 @@ class Description
         if ($formatter === null) {
             $formatter = new PassthroughFormatter();
         }
+
         $tags = [];
         foreach ($this->tags as $tag) {
             $tags[] = '{' . $formatter->format($tag) . '}';
         }
         return vsprintf($this->bodyTemplate, $tags);
     }
+
     /**
      * Returns a plain string representation of this description.
      *

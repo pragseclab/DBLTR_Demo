@@ -26,7 +26,8 @@ RUN docker-php-ext-install -j$(nproc) \
                            bcmath \
                            soap \
                            xsl \
-                           sockets
+                           sockets \
+                           mbstring
 # RUN pecl install xdebug-2.8.0 imagick
 # RUN docker-php-ext-enable xdebug \
 RUN pecl install imagick

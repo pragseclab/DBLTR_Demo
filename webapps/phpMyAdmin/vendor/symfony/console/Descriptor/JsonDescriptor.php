@@ -57,59 +57,71 @@ class JsonDescriptor extends Descriptor
      */
     protected function describeApplication(Application $application, array $options = array())
     {
-        $describedNamespace = $options['namespace'] ?? null;
-        $description = new ApplicationDescription($application, $describedNamespace, true);
-        $commands = [];
+        $describedNamespace = isset($options['namespace']) ? $options['namespace'] : null;
+        $description = new ApplicationDescription($application, $describedNamespace);
+        $commands = array();
         foreach ($description->getCommands() as $command) {
             $commands[] = $this->getCommandData($command);
         }
-        $data = [];
-        if ('UNKNOWN' !== $application->getName()) {
-            $data['application']['name'] = $application->getName();
-            if ('UNKNOWN' !== $application->getVersion()) {
-                $data['application']['version'] = $application->getVersion();
-            }
-        }
-        $data['commands'] = $commands;
-        if ($describedNamespace) {
-            $data['namespace'] = $describedNamespace;
-        } else {
-            $data['namespaces'] = array_values($description->getNamespaces());
-        }
+        $data = $describedNamespace ? array('commands' => $commands, 'namespace' => $describedNamespace) : array('commands' => $commands, 'namespaces' => array_values($description->getNamespaces()));
         $this->writeData($data, $options);
     }
     /**
      * Writes data as json.
+     *
+     * @param array $data
+     * @param array $options
+     *
+     * @return array|string
      */
     private function writeData(array $data, array $options)
     {
-        $flags = $options['json_encoding'] ?? 0;
-        $this->write(json_encode($data, $flags));
+        $this->write(json_encode($data, isset($options['json_encoding']) ? $options['json_encoding'] : 0));
     }
-    private function getInputArgumentData(InputArgument $argument) : array
+    /**
+     * @param InputArgument $argument
+     *
+     * @return array
+     */
+    private function getInputArgumentData(InputArgument $argument)
     {
-        return ['name' => $argument->getName(), 'is_required' => $argument->isRequired(), 'is_array' => $argument->isArray(), 'description' => preg_replace('/\\s*[\\r\\n]\\s*/', ' ', $argument->getDescription()), 'default' => \INF === $argument->getDefault() ? 'INF' : $argument->getDefault()];
+        return array('name' => $argument->getName(), 'is_required' => $argument->isRequired(), 'is_array' => $argument->isArray(), 'description' => preg_replace('/\\s*[\\r\\n]\\s*/', ' ', $argument->getDescription()), 'default' => $argument->getDefault());
     }
-    private function getInputOptionData(InputOption $option) : array
+    /**
+     * @param InputOption $option
+     *
+     * @return array
+     */
+    private function getInputOptionData(InputOption $option)
     {
-        return ['name' => '--' . $option->getName(), 'shortcut' => $option->getShortcut() ? '-' . str_replace('|', '|-', $option->getShortcut()) : '', 'accept_value' => $option->acceptValue(), 'is_value_required' => $option->isValueRequired(), 'is_multiple' => $option->isArray(), 'description' => preg_replace('/\\s*[\\r\\n]\\s*/', ' ', $option->getDescription()), 'default' => \INF === $option->getDefault() ? 'INF' : $option->getDefault()];
+        return array('name' => '--' . $option->getName(), 'shortcut' => $option->getShortcut() ? '-' . implode('|-', explode('|', $option->getShortcut())) : '', 'accept_value' => $option->acceptValue(), 'is_value_required' => $option->isValueRequired(), 'is_multiple' => $option->isArray(), 'description' => preg_replace('/\\s*[\\r\\n]\\s*/', ' ', $option->getDescription()), 'default' => $option->getDefault());
     }
-    private function getInputDefinitionData(InputDefinition $definition) : array
+    /**
+     * @param InputDefinition $definition
+     *
+     * @return array
+     */
+    private function getInputDefinitionData(InputDefinition $definition)
     {
-        $inputArguments = [];
+        $inputArguments = array();
         foreach ($definition->getArguments() as $name => $argument) {
             $inputArguments[$name] = $this->getInputArgumentData($argument);
         }
-        $inputOptions = [];
+        $inputOptions = array();
         foreach ($definition->getOptions() as $name => $option) {
             $inputOptions[$name] = $this->getInputOptionData($option);
         }
-        return ['arguments' => $inputArguments, 'options' => $inputOptions];
+        return array('arguments' => $inputArguments, 'options' => $inputOptions);
     }
-    private function getCommandData(Command $command) : array
+    /**
+     * @param Command $command
+     *
+     * @return array
+     */
+    private function getCommandData(Command $command)
     {
         $command->getSynopsis();
         $command->mergeApplicationDefinition(false);
-        return ['name' => $command->getName(), 'usage' => array_merge([$command->getSynopsis()], $command->getUsages(), $command->getAliases()), 'description' => $command->getDescription(), 'help' => $command->getProcessedHelp(), 'definition' => $this->getInputDefinitionData($command->getNativeDefinition()), 'hidden' => $command->isHidden()];
+        return array('name' => $command->getName(), 'usage' => array_merge(array($command->getSynopsis()), $command->getUsages(), $command->getAliases()), 'description' => $command->getDescription(), 'help' => $command->getProcessedHelp(), 'definition' => $this->getInputDefinitionData($command->getNativeDefinition()));
     }
 }

@@ -1,10 +1,42 @@
-version: "3"
+version: '3'
 services:
-  analysis:
-    build: dockerfiles/notebook
+  reverse-proxy:
+    image: openresty/openresty:buster
     volumes:
-      - ./:/home/jovyan/work/
+    - ./docker/reverse-proxy/default.conf:/etc/nginx/conf.d/default.conf
+    - ./docker/reverse-proxy/lua/:/usr/local/lua/
     ports:
-      - 8888:8888
+    - 8080:80
+  redis:
+    image: redis:bullseye
+  bootstrap:
+    build: ./dockerfiles/bootstrap/
+    depends_on:
+    - redis
+  db:
+    build: ./dockerfiles/db/
+    volumes:
+    - /var/lib/mysql
+    tty: true
+    stdin_open: false
     environment:
-      - JUPYTER_TOKEN=jupytersecrettokenabhsyd68ay
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+  webserver0:
+    build: ./dockerfiles/web
+    volumes:
+    - ./docker/webservers/pma/conf/apache2.conf:/etc/apache2/apache2.conf
+    - ./docker/webservers/pma/conf/sites-enabled/:/etc/apache2/sites-enabled/
+    - ./webapps/PMA_spectral_Clusters/PMA_spectral_0/:/var/www/html/
+    - ./docker/session:/tmp
+    tty: true
+    stdin_open: false
+  webserver1:
+    build: ./dockerfiles/web
+    volumes:
+    - ./docker/webservers/pma/conf/apache2.conf:/etc/apache2/apache2.conf
+    - ./docker/webservers/pma/conf/sites-enabled/:/etc/apache2/sites-enabled/
+    - ./webapps/PMA_spectral_Clusters/PMA_spectral_1/:/var/www/html/
+    - ./docker/session:/tmp
+    tty: true
+    stdin_open: false

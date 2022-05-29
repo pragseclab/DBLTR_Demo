@@ -1,7 +1,5 @@
 <?php
-
-use PHPUnit\Framework\TestCase;
-class CoverageNothingTest extends TestCase
+class CoverageNothingTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @covers CoveredClass::publicMethod
@@ -9,7 +7,7 @@ class CoverageNothingTest extends TestCase
      */
     public function testSomething()
     {
-        $o = new CoveredClass();
+        $o = new CoveredClass;
         $o->publicMethod();
     }
 }

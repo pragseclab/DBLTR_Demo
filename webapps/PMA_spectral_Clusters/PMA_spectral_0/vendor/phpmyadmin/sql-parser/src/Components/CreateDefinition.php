@@ -5,7 +5,6 @@
  *
  * Used for parsing `CREATE TABLE` statement.
  */
-declare (strict_types=1);
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
@@ -13,13 +12,14 @@ use PhpMyAdmin\SqlParser\Context;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function implode;
-use function is_array;
-use function trim;
 /**
  * Parses the create definition of a column or a key.
  *
  * Used for parsing `CREATE TABLE` statement.
+ *
+ * @category   Components
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class CreateDefinition extends Component
 {
@@ -35,10 +35,6 @@ class CreateDefinition extends Component
         'NOT NULL' => 1,
         'NULL' => 1,
         'DEFAULT' => array(2, 'expr', array('breakOnAlias' => true)),
-        /* Following are not according to grammar, but MySQL happily accepts
-         * these at any location */
-        'CHARSET' => array(2, 'var'),
-        'COLLATE' => array(3, 'var'),
         'AUTO_INCREMENT' => 3,
         'PRIMARY' => 4,
         'PRIMARY KEY' => 4,
@@ -53,8 +49,6 @@ class CreateDefinition extends Component
         'VIRTUAL' => 10,
         'PERSISTENT' => 11,
         'STORED' => 11,
-        'CHECK' => array(12, 'expr', array('parenthesesDelimited' => true)),
-        'INVISIBLE' => 13,
     );
     /**
      * The name of the new column.
@@ -93,6 +87,8 @@ class CreateDefinition extends Component
      */
     public $options;
     /**
+     * Constructor.
+     *
      * @param string       $name         the name of the field
      * @param OptionsArray $options      the options of this field
      * @param DataType|Key $type         the data type of this field or the key
@@ -120,8 +116,8 @@ class CreateDefinition extends Component
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = [];
-        $expr = new static();
+        $ret = array();
+        $expr = new self();
         /**
          * The state of the parser.
          *
@@ -211,7 +207,7 @@ class CreateDefinition extends Component
                 if (!empty($expr->type) || !empty($expr->key)) {
                     $ret[] = $expr;
                 }
-                $expr = new static();
+                $expr = new self();
                 if ($token->value === ',') {
                     $state = 1;
                 } elseif ($token->value === ')') {
@@ -243,26 +239,8 @@ class CreateDefinition extends Component
      */
     public static function build($component, array $options = array())
     {
-        if (is_array($component)) {
-            return "(\n  " . implode(",\n  ", $component) . "\n)";
-        }
-        $tmp = '';
-        if ($component->isConstraint) {
-            $tmp .= 'CONSTRAINT ';
-        }
-        if (isset($component->name) && $component->name !== '') {
-            $tmp .= Context::escape($component->name) . ' ';
-        }
-        if (!empty($component->type)) {
-            $tmp .= DataType::build($component->type, ['lowercase' => true]) . ' ';
-        }
-        if (!empty($component->key)) {
-            $tmp .= $component->key . ' ';
-        }
-        if (!empty($component->references)) {
-            $tmp .= 'REFERENCES ' . $component->references . ' ';
-        }
-        $tmp .= $component->options;
-        return trim($tmp);
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("build") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/CreateDefinition.php at line 304")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called build:304@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/CreateDefinition.php');
+        die();
     }
 }

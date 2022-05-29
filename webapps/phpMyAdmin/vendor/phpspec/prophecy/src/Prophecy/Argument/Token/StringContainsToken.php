@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Argument\Token;
 
 /**
@@ -18,6 +19,7 @@ namespace Prophecy\Argument\Token;
 class StringContainsToken implements TokenInterface
 {
     private $value;
+
     /**
      * Initializes token.
      *
@@ -27,10 +29,12 @@ class StringContainsToken implements TokenInterface
     {
         $this->value = $value;
     }
+
     public function scoreArgument($argument)
     {
-        return is_string($argument) && strpos($argument, $this->value) !== false ? 6 : false;
+        return strpos($argument, $this->value) !== false ? 6 : false;
     }
+
     /**
      * Returns preset value against which token checks arguments.
      *
@@ -40,6 +44,7 @@ class StringContainsToken implements TokenInterface
     {
         return $this->value;
     }
+
     /**
      * Returns false.
      *
@@ -49,6 +54,7 @@ class StringContainsToken implements TokenInterface
     {
         return false;
     }
+
     /**
      * Returns string representation for token.
      *

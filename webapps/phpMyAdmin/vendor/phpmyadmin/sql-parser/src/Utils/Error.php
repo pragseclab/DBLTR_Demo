@@ -3,17 +3,18 @@
 /**
  * Error related utilities.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Utils;
 
-use PhpMyAdmin\SqlParser\Exceptions\LexerException;
-use PhpMyAdmin\SqlParser\Exceptions\ParserException;
 use PhpMyAdmin\SqlParser\Lexer;
 use PhpMyAdmin\SqlParser\Parser;
-use function htmlspecialchars;
-use function sprintf;
+
 /**
  * Error related utilities.
+ *
+ * @category   Exceptions
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class Error
 {
@@ -27,26 +28,37 @@ class Error
      *               `$err[1]` holds the error code.
      *               `$err[2]` holds the string that caused the issue.
      *               `$err[3]` holds the position of the string.
-     *               (i.e. `[$msg, $code, $str, $pos]`)
+     *               (i.e. `array($msg, $code, $str, $pos)`)
      */
     public static function get($objs)
     {
-        $ret = [];
+        $ret = array();
+
         foreach ($objs as $obj) {
             if ($obj instanceof Lexer) {
-                /** @var LexerException $err */
                 foreach ($obj->errors as $err) {
-                    $ret[] = [$err->getMessage(), $err->getCode(), $err->ch, $err->pos];
+                    $ret[] = array(
+                        $err->getMessage(),
+                        $err->getCode(),
+                        $err->ch,
+                        $err->pos,
+                    );
                 }
             } elseif ($obj instanceof Parser) {
-                /** @var ParserException $err */
                 foreach ($obj->errors as $err) {
-                    $ret[] = [$err->getMessage(), $err->getCode(), $err->token->token, $err->token->position];
+                    $ret[] = array(
+                        $err->getMessage(),
+                        $err->getCode(),
+                        $err->token->token,
+                        $err->token->position,
+                    );
                 }
             }
         }
+
         return $ret;
     }
+
     /**
      * Formats the specified errors.
      *
@@ -61,13 +73,24 @@ class Error
      *
      * @return array
      */
-    public static function format($errors, $format = '#%1$d: %2$s (near "%4$s" at position %5$d)')
-    {
-        $ret = [];
+    public static function format(
+        $errors,
+        $format = '#%1$d: %2$s (near "%4$s" at position %5$d)'
+    ) {
+        $ret = array();
+
         $i = 0;
         foreach ($errors as $key => $err) {
-            $ret[$key] = sprintf($format, ++$i, $err[0], $err[1], htmlspecialchars((string) $err[2]), $err[3]);
+            $ret[$key] = sprintf(
+                $format,
+                ++$i,
+                $err[0],
+                $err[1],
+                htmlspecialchars($err[2]),
+                $err[3]
+            );
         }
+
         return $ret;
     }
 }

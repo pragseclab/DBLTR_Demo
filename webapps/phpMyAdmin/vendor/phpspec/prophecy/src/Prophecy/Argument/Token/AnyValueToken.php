@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Argument\Token;
 
 /**
@@ -28,6 +29,7 @@ class AnyValueToken implements TokenInterface
     {
         return 3;
     }
+
     /**
      * Returns false.
      *
@@ -37,6 +39,7 @@ class AnyValueToken implements TokenInterface
     {
         return false;
     }
+
     /**
      * Returns string representation for token.
      *

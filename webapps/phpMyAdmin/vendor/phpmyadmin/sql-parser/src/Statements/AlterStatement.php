@@ -3,7 +3,7 @@
 /**
  * `ALTER` statement.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Statements;
 
 use PhpMyAdmin\SqlParser\Components\AlterOperation;
@@ -13,9 +13,13 @@ use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Statement;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function implode;
+
 /**
  * `ALTER` statement.
+ *
+ * @category   Statements
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class AlterStatement extends Statement
 {
@@ -25,32 +29,59 @@ class AlterStatement extends Statement
      * @var Expression
      */
     public $table;
+
     /**
      * Column affected by this statement.
      *
      * @var AlterOperation[]
      */
     public $altered = array();
+
     /**
      * Options of this statement.
      *
      * @var array
      */
-    public static $OPTIONS = array('ONLINE' => 1, 'OFFLINE' => 1, 'IGNORE' => 2, 'DATABASE' => 3, 'EVENT' => 3, 'FUNCTION' => 3, 'PROCEDURE' => 3, 'SERVER' => 3, 'TABLE' => 3, 'TABLESPACE' => 3, 'VIEW' => 3);
+    public static $OPTIONS = array(
+        'ONLINE' => 1,
+        'OFFLINE' => 1,
+        'IGNORE' => 2,
+
+        'DATABASE' => 3,
+        'EVENT' => 3,
+        'FUNCTION' => 3,
+        'PROCEDURE' => 3,
+        'SERVER' => 3,
+        'TABLE' => 3,
+        'TABLESPACE' => 3,
+        'VIEW' => 3,
+    );
+
     /**
      * @param Parser     $parser the instance that requests parsing
      * @param TokensList $list   the list of tokens to be parsed
      */
     public function parse(Parser $parser, TokensList $list)
     {
+        ++$list->idx; // Skipping `ALTER`.
+        $this->options = OptionsArray::parse(
+            $parser,
+            $list,
+            static::$OPTIONS
+        );
         ++$list->idx;
-        // Skipping `ALTER`.
-        $this->options = OptionsArray::parse($parser, $list, static::$OPTIONS);
-        ++$list->idx;
+
         // Parsing affected table.
-        $this->table = Expression::parse($parser, $list, ['parseField' => 'table', 'breakOnAlias' => true]);
-        ++$list->idx;
-        // Skipping field.
+        $this->table = Expression::parse(
+            $parser,
+            $list,
+            array(
+                'parseField' => 'table',
+                'breakOnAlias' => true,
+            )
+        );
+        ++$list->idx; // Skipping field.
+
         /**
          * The state of the parser.
          *
@@ -63,6 +94,7 @@ class AlterStatement extends Statement
          * @var int
          */
         $state = 0;
+
         for (; $list->idx < $list->count; ++$list->idx) {
             /**
              * Token parsed at this moment.
@@ -70,16 +102,19 @@ class AlterStatement extends Statement
              * @var Token
              */
             $token = $list->tokens[$list->idx];
+
             // End of statement.
             if ($token->type === Token::TYPE_DELIMITER) {
                 break;
             }
+
             // Skipping whitespaces and comments.
-            if ($token->type === Token::TYPE_WHITESPACE || $token->type === Token::TYPE_COMMENT) {
+            if (($token->type === Token::TYPE_WHITESPACE) || ($token->type === Token::TYPE_COMMENT)) {
                 continue;
             }
+
             if ($state === 0) {
-                $options = [];
+                $options = array();
                 if ($this->options->has('DATABASE')) {
                     $options = AlterOperation::$DB_OPTIONS;
                 } elseif ($this->options->has('TABLE')) {
@@ -87,24 +122,29 @@ class AlterStatement extends Statement
                 } elseif ($this->options->has('VIEW')) {
                     $options = AlterOperation::$VIEW_OPTIONS;
                 }
+
                 $this->altered[] = AlterOperation::parse($parser, $list, $options);
                 $state = 1;
             } elseif ($state === 1) {
-                if ($token->type === Token::TYPE_OPERATOR && $token->value === ',') {
+                if (($token->type === Token::TYPE_OPERATOR) && ($token->value === ',')) {
                     $state = 0;
                 }
             }
         }
     }
+
     /**
      * @return string
      */
     public function build()
     {
-        $tmp = [];
+        $tmp = array();
         foreach ($this->altered as $altered) {
             $tmp[] = $altered::build($altered);
         }
-        return 'ALTER ' . OptionsArray::build($this->options) . ' ' . Expression::build($this->table) . ' ' . implode(', ', $tmp);
+
+        return 'ALTER ' . OptionsArray::build($this->options)
+            . ' ' . Expression::build($this->table)
+            . ' ' . implode(', ', $tmp);
     }
 }

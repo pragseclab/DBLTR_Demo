@@ -201,7 +201,7 @@ class TCPDF_PARSER
         $startxref += 4;
         // 4 is the length of the word 'xref'
         // skip initial white space chars: \x00 null (NUL), \x09 horizontal tab (HT), \x0A line feed (LF), \x0C form feed (FF), \x0D carriage return (CR), \x20 space (SP)
-        $offset = $startxref + strspn($this->pdfdata, "\x00\t\n\f\r ", $startxref);
+        $offset = $startxref + strspn($this->pdfdata, "\0\t\n\f\r ", $startxref);
         // initialize object number
         $obj_num = 0;
         // search for cross-reference entries or subsection
@@ -490,7 +490,7 @@ class TCPDF_PARSER
         $objval = '';
         // object value to be returned
         // skip initial white space chars: \x00 null (NUL), \x09 horizontal tab (HT), \x0A line feed (LF), \x0C form feed (FF), \x0D carriage return (CR), \x20 space (SP)
-        $offset += strspn($this->pdfdata, "\x00\t\n\f\r ", $offset);
+        $offset += strspn($this->pdfdata, "\0\t\n\f\r ", $offset);
         // get first char
         $char = $this->pdfdata[$offset];
         // get object type

@@ -8,9 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Symfony\Component\Config\Loader;
 
-use Symfony\Component\Config\Exception\LoaderLoadException;
+use Symfony\Component\Config\Exception\FileLoaderLoadException;
+
 /**
  * Loader is the abstract class used by all built-in loaders.
  *
@@ -19,6 +21,7 @@ use Symfony\Component\Config\Exception\LoaderLoadException;
 abstract class Loader implements LoaderInterface
 {
     protected $resolver;
+
     /**
      * {@inheritdoc}
      */
@@ -26,6 +29,7 @@ abstract class Loader implements LoaderInterface
     {
         return $this->resolver;
     }
+
     /**
      * {@inheritdoc}
      */
@@ -33,6 +37,7 @@ abstract class Loader implements LoaderInterface
     {
         $this->resolver = $resolver;
     }
+
     /**
      * Imports a resource.
      *
@@ -45,6 +50,7 @@ abstract class Loader implements LoaderInterface
     {
         return $this->resolve($resource, $type)->load($resource, $type);
     }
+
     /**
      * Finds a loader able to load an imported resource.
      *
@@ -53,17 +59,20 @@ abstract class Loader implements LoaderInterface
      *
      * @return $this|LoaderInterface
      *
-     * @throws LoaderLoadException If no loader is found
+     * @throws FileLoaderLoadException If no loader is found
      */
     public function resolve($resource, $type = null)
     {
         if ($this->supports($resource, $type)) {
             return $this;
         }
+
         $loader = null === $this->resolver ? false : $this->resolver->resolve($resource, $type);
+
         if (false === $loader) {
-            throw new LoaderLoadException($resource, null, null, null, $type);
+            throw new FileLoaderLoadException($resource);
         }
+
         return $loader;
     }
 }

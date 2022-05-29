@@ -8,9 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Doubler\ClassPatch;
 
 use Prophecy\Doubler\Generator\Node\ClassNode;
+
 /**
  * Remove method functionality from the double which will clash with php keywords.
  *
@@ -29,6 +31,7 @@ class KeywordPatch implements ClassPatchInterface
     {
         return true;
     }
+
     /**
      * Remove methods that clash with php keywords
      *
@@ -42,25 +45,91 @@ class KeywordPatch implements ClassPatchInterface
             $node->removeMethod($methodName);
         }
     }
+
     /**
      * Returns patch priority, which determines when patch will be applied.
      *
      * @return int Priority number (higher - earlier)
      */
-    public function getPriority()
-    {
+    public function getPriority() {
         return 49;
     }
+
     /**
      * Returns array of php keywords.
      *
      * @return array
      */
-    private function getKeywords()
-    {
-        if (\PHP_VERSION_ID >= 70000) {
-            return array('__halt_compiler');
-        }
-        return array('__halt_compiler', 'abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch', 'class', 'clone', 'const', 'continue', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit', 'extends', 'final', 'finally', 'for', 'foreach', 'function', 'global', 'goto', 'if', 'implements', 'include', 'include_once', 'instanceof', 'insteadof', 'interface', 'isset', 'list', 'namespace', 'new', 'or', 'print', 'private', 'protected', 'public', 'require', 'require_once', 'return', 'static', 'switch', 'throw', 'trait', 'try', 'unset', 'use', 'var', 'while', 'xor', 'yield');
+    private function getKeywords() {
+
+        return array(
+            '__halt_compiler',
+            'abstract',
+            'and',
+            'array',
+            'as',
+            'break',
+            'callable',
+            'case',
+            'catch',
+            'class',
+            'clone',
+            'const',
+            'continue',
+            'declare',
+            'default',
+            'die',
+            'do',
+            'echo',
+            'else',
+            'elseif',
+            'empty',
+            'enddeclare',
+            'endfor',
+            'endforeach',
+            'endif',
+            'endswitch',
+            'endwhile',
+            'eval',
+            'exit',
+            'extends',
+            'final',
+            'finally',
+            'for',
+            'foreach',
+            'function',
+            'global',
+            'goto',
+            'if',
+            'implements',
+            'include',
+            'include_once',
+            'instanceof',
+            'insteadof',
+            'interface',
+            'isset',
+            'list',
+            'namespace',
+            'new',
+            'or',
+            'print',
+            'private',
+            'protected',
+            'public',
+            'require',
+            'require_once',
+            'return',
+            'static',
+            'switch',
+            'throw',
+            'trait',
+            'try',
+            'unset',
+            'use',
+            'var',
+            'while',
+            'xor',
+            'yield',
+        );
     }
 }

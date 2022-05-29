@@ -1,133 +1,139 @@
 <?php
-
-/*
- * This file is part of PHPUnit.
- *
- * (c) Sebastian Bergmann <sebastian@phpunit.de>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-use PHPUnit\Framework\TestCase;
-class ExceptionTest extends TestCase
+class ExceptionTest extends PHPUnit_Framework_TestCase
 {
     /**
      * Exception message
      *
      * @var string
      */
-    public const ERROR_MESSAGE = 'Exception message';
+    const ERROR_MESSAGE = 'Exception message';
+
     /**
      * Exception message
      *
      * @var string
      */
-    public const ERROR_MESSAGE_REGEX = '#regex#';
+    const ERROR_MESSAGE_REGEX = '#regex#';
+
     /**
      * Exception code
      *
      * @var int
      */
-    public const ERROR_CODE = 500;
+    const ERROR_CODE = 500;
+
     /**
      * @expectedException FooBarBaz
      */
-    public function testOne() : void
+    public function testOne()
     {
     }
+
     /**
      * @expectedException Foo_Bar_Baz
      */
-    public function testTwo() : void
+    public function testTwo()
     {
     }
+
     /**
      * @expectedException Foo\Bar\Baz
      */
-    public function testThree() : void
+    public function testThree()
     {
     }
+
     /**
      * @expectedException ほげ
      */
-    public function testFour() : void
+    public function testFour()
     {
     }
+
     /**
      * @expectedException Class Message 1234
      */
-    public function testFive() : void
+    public function testFive()
     {
     }
+
     /**
      * @expectedException Class
      * @expectedExceptionMessage Message
      * @expectedExceptionCode 1234
      */
-    public function testSix() : void
+    public function testSix()
     {
     }
+
     /**
      * @expectedException Class
      * @expectedExceptionMessage Message
      * @expectedExceptionCode ExceptionCode
      */
-    public function testSeven() : void
+    public function testSeven()
     {
     }
+
     /**
      * @expectedException Class
      * @expectedExceptionMessage Message
      * @expectedExceptionCode 0
      */
-    public function testEight() : void
+    public function testEight()
     {
     }
+
     /**
      * @expectedException Class
      * @expectedExceptionMessage ExceptionTest::ERROR_MESSAGE
      * @expectedExceptionCode ExceptionTest::ERROR_CODE
      */
-    public function testNine() : void
+    public function testNine()
     {
     }
+
     /** @expectedException Class */
-    public function testSingleLine() : void
+    public function testSingleLine()
     {
     }
+
     /**
      * @expectedException Class
      * @expectedExceptionCode ExceptionTest::UNKNOWN_CODE_CONSTANT
      * @expectedExceptionMessage ExceptionTest::UNKNOWN_MESSAGE_CONSTANT
      */
-    public function testUnknownConstants() : void
+    public function testUnknownConstants()
     {
     }
+
     /**
      * @expectedException Class
      * @expectedExceptionCode 1234
      * @expectedExceptionMessage Message
      * @expectedExceptionMessageRegExp #regex#
      */
-    public function testWithRegexMessage() : void
+    public function testWithRegexMessage()
     {
     }
+
     /**
      * @expectedException Class
      * @expectedExceptionCode 1234
      * @expectedExceptionMessage Message
      * @expectedExceptionMessageRegExp ExceptionTest::ERROR_MESSAGE_REGEX
      */
-    public function testWithRegexMessageFromClassConstant() : void
+    public function testWithRegexMessageFromClassConstant()
     {
     }
+
     /**
      * @expectedException Class
      * @expectedExceptionCode 1234
      * @expectedExceptionMessage Message
      * @expectedExceptionMessageRegExp ExceptionTest::UNKNOWN_MESSAGE_REGEX_CONSTANT
      */
-    public function testWithUnknowRegexMessageFromClassConstant() : void
+    public function testWithUnknowRegexMessageFromClassConstant()
     {
     }
 }

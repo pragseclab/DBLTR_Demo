@@ -1,14 +1,15 @@
 <?php
-
 require_once 'BankAccount.php';
-use PHPUnit\Framework\TestCase;
-class BankAccountTest extends TestCase
+
+class BankAccountTest extends PHPUnit_Framework_TestCase
 {
     protected $ba;
+
     protected function setUp()
     {
-        $this->ba = new BankAccount();
+        $this->ba = new BankAccount;
     }
+
     /**
      * @covers BankAccount::getBalance
      */
@@ -16,6 +17,7 @@ class BankAccountTest extends TestCase
     {
         $this->assertEquals(0, $this->ba->getBalance());
     }
+
     /**
      * @covers BankAccount::withdrawMoney
      */
@@ -25,10 +27,13 @@ class BankAccountTest extends TestCase
             $this->ba->withdrawMoney(1);
         } catch (RuntimeException $e) {
             $this->assertEquals(0, $this->ba->getBalance());
+
             return;
         }
+
         $this->fail();
     }
+
     /**
      * @covers BankAccount::depositMoney
      */
@@ -38,10 +43,13 @@ class BankAccountTest extends TestCase
             $this->ba->depositMoney(-1);
         } catch (RuntimeException $e) {
             $this->assertEquals(0, $this->ba->getBalance());
+
             return;
         }
+
         $this->fail();
     }
+
     /**
      * @covers BankAccount::getBalance
      * @covers BankAccount::depositMoney

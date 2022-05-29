@@ -30,21 +30,22 @@ class ProgressIndicator
     private static $formatters;
     private static $formats;
     /**
-     * @param string|null $format                  Indicator format
-     * @param int         $indicatorChangeInterval Change interval in milliseconds
-     * @param array|null  $indicatorValues         Animated indicator characters
+     * @param OutputInterface $output
+     * @param string|null     $format                  Indicator format
+     * @param int             $indicatorChangeInterval Change interval in milliseconds
+     * @param array|null      $indicatorValues         Animated indicator characters
      */
-    public function __construct(OutputInterface $output, string $format = null, int $indicatorChangeInterval = 100, array $indicatorValues = null)
+    public function __construct(OutputInterface $output, $format = null, $indicatorChangeInterval = 100, $indicatorValues = null)
     {
         $this->output = $output;
         if (null === $format) {
             $format = $this->determineBestFormat();
         }
         if (null === $indicatorValues) {
-            $indicatorValues = ['-', '\\', '|', '/'];
+            $indicatorValues = array('-', '\\', '|', '/');
         }
         $indicatorValues = array_values($indicatorValues);
-        if (2 > \count($indicatorValues)) {
+        if (2 > count($indicatorValues)) {
             throw new InvalidArgumentException('Must have at least 2 indicator value characters.');
         }
         $this->format = self::getFormatDefinition($format);
@@ -125,7 +126,7 @@ class ProgressIndicator
         if (!self::$formats) {
             self::$formats = self::initFormats();
         }
-        return self::$formats[$name] ?? null;
+        return isset(self::$formats[$name]) ? self::$formats[$name] : null;
     }
     /**
      * Sets a placeholder formatter for a given name.
@@ -154,21 +155,22 @@ class ProgressIndicator
         if (!self::$formatters) {
             self::$formatters = self::initPlaceholderFormatters();
         }
-        return self::$formatters[$name] ?? null;
+        return isset(self::$formatters[$name]) ? self::$formatters[$name] : null;
     }
     private function display()
     {
         if (OutputInterface::VERBOSITY_QUIET === $this->output->getVerbosity()) {
             return;
         }
-        $this->overwrite(preg_replace_callback("{%([a-z\\-_]+)(?:\\:([^%]+))?%}i", function ($matches) {
-            if ($formatter = self::getPlaceholderFormatterDefinition($matches[1])) {
-                return $formatter($this);
+        $self = $this;
+        $this->overwrite(preg_replace_callback("{%([a-z\\-_]+)(?:\\:([^%]+))?%}i", function ($matches) use($self) {
+            if ($formatter = $self::getPlaceholderFormatterDefinition($matches[1])) {
+                return call_user_func($formatter, $self);
             }
             return $matches[0];
         }, $this->format));
     }
-    private function determineBestFormat() : string
+    private function determineBestFormat()
     {
         switch ($this->output->getVerbosity()) {
             // OutputInterface::VERBOSITY_QUIET: display is disabled anyway
@@ -183,34 +185,36 @@ class ProgressIndicator
     }
     /**
      * Overwrites a previous message to the output.
+     *
+     * @param string $message The message
      */
-    private function overwrite(string $message)
+    private function overwrite($message)
     {
         if ($this->output->isDecorated()) {
-            $this->output->write("\r\x1b[2K");
+            $this->output->write("\r\33[2K");
             $this->output->write($message);
         } else {
             $this->output->writeln($message);
         }
     }
-    private function getCurrentTimeInMilliseconds() : float
+    private function getCurrentTimeInMilliseconds()
     {
         return round(microtime(true) * 1000);
     }
-    private static function initPlaceholderFormatters() : array
+    private static function initPlaceholderFormatters()
     {
-        return ['indicator' => function (self $indicator) {
-            return $indicator->indicatorValues[$indicator->indicatorCurrent % \count($indicator->indicatorValues)];
-        }, 'message' => function (self $indicator) {
+        return array('indicator' => function (ProgressIndicator $indicator) {
+            return $indicator->indicatorValues[$indicator->indicatorCurrent % count($indicator->indicatorValues)];
+        }, 'message' => function (ProgressIndicator $indicator) {
             return $indicator->message;
-        }, 'elapsed' => function (self $indicator) {
+        }, 'elapsed' => function (ProgressIndicator $indicator) {
             return Helper::formatTime(time() - $indicator->startTime);
         }, 'memory' => function () {
             return Helper::formatMemory(memory_get_usage(true));
-        }];
+        });
     }
-    private static function initFormats() : array
+    private static function initFormats()
     {
-        return ['normal' => ' %indicator% %message%', 'normal_no_ansi' => ' %message%', 'verbose' => ' %indicator% %message% (%elapsed:6s%)', 'verbose_no_ansi' => ' %message% (%elapsed:6s%)', 'very_verbose' => ' %indicator% %message% (%elapsed:6s%, %memory:6s%)', 'very_verbose_no_ansi' => ' %message% (%elapsed:6s%, %memory:6s%)'];
+        return array('normal' => ' %indicator% %message%', 'normal_no_ansi' => ' %message%', 'verbose' => ' %indicator% %message% (%elapsed:6s%)', 'verbose_no_ansi' => ' %message% (%elapsed:6s%)', 'very_verbose' => ' %indicator% %message% (%elapsed:6s%, %memory:6s%)', 'very_verbose_no_ansi' => ' %message% (%elapsed:6s%, %memory:6s%)');
     }
 }

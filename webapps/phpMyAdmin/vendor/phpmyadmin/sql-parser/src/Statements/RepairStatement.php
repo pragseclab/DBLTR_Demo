@@ -3,7 +3,7 @@
 /**
  * `REPAIR` statement.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Statements;
 
 /**
@@ -12,6 +12,10 @@ namespace PhpMyAdmin\SqlParser\Statements;
  * REPAIR [NO_WRITE_TO_BINLOG | LOCAL] TABLE
  *  tbl_name [, tbl_name] ...
  *  [QUICK] [EXTENDED] [USE_FRM]
+ *
+ * @category   Statements
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class RepairStatement extends MaintenanceStatement
 {
@@ -20,5 +24,14 @@ class RepairStatement extends MaintenanceStatement
      *
      * @var array
      */
-    public static $OPTIONS = array('TABLE' => 1, 'NO_WRITE_TO_BINLOG' => 2, 'LOCAL' => 3, 'QUICK' => 4, 'EXTENDED' => 5, 'USE_FRM' => 6);
+    public static $OPTIONS = array(
+        'TABLE' => 1,
+
+        'NO_WRITE_TO_BINLOG' => 2,
+        'LOCAL' => 3,
+
+        'QUICK' => 4,
+        'EXTENDED' => 5,
+        'USE_FRM' => 6,
+    );
 }

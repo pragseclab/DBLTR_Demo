@@ -3,13 +3,18 @@
 /**
  * `DROP` statement.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Statements;
 
 use PhpMyAdmin\SqlParser\Components\Expression;
 use PhpMyAdmin\SqlParser\Statement;
+
 /**
  * `DROP` statement.
+ *
+ * @category   Statements
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class DropStatement extends Statement
 {
@@ -18,7 +23,24 @@ class DropStatement extends Statement
      *
      * @var array
      */
-    public static $OPTIONS = array('DATABASE' => 1, 'EVENT' => 1, 'FUNCTION' => 1, 'INDEX' => 1, 'LOGFILE' => 1, 'PROCEDURE' => 1, 'SCHEMA' => 1, 'SERVER' => 1, 'TABLE' => 1, 'VIEW' => 1, 'TABLESPACE' => 1, 'TRIGGER' => 1, 'USER' => 1, 'TEMPORARY' => 2, 'IF EXISTS' => 3);
+    public static $OPTIONS = array(
+        'DATABASE' => 1,
+        'EVENT' => 1,
+        'FUNCTION' => 1,
+        'INDEX' => 1,
+        'LOGFILE' => 1,
+        'PROCEDURE' => 1,
+        'SCHEMA' => 1,
+        'SERVER' => 1,
+        'TABLE' => 1,
+        'VIEW' => 1,
+        'TABLESPACE' => 1,
+        'TRIGGER' => 1,
+
+        'TEMPORARY' => 2,
+        'IF EXISTS' => 3,
+    );
+
     /**
      * The clauses of this statement, in order.
      *
@@ -34,12 +56,14 @@ class DropStatement extends Statement
         'DROP_' => array('DROP', 1),
         'ON' => array('ON', 3),
     );
+
     /**
      * Dropped elements.
      *
      * @var Expression[]
      */
     public $fields;
+
     /**
      * Table of the dropped index.
      *

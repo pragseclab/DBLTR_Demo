@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Argument\Token;
 
 /**
@@ -28,6 +29,7 @@ class AnyValuesToken implements TokenInterface
     {
         return 2;
     }
+
     /**
      * Returns true to stop wildcard from processing other tokens.
      *
@@ -37,6 +39,7 @@ class AnyValuesToken implements TokenInterface
     {
         return true;
     }
+
     /**
      * Returns string representation for token.
      *

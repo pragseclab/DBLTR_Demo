@@ -17,10 +17,10 @@ use Symfony\Component\Console\Exception\LogicException;
  *
  * Usage:
  *
- *     $definition = new InputDefinition([
- *         new InputArgument('name', InputArgument::REQUIRED),
- *         new InputOption('foo', 'f', InputOption::VALUE_REQUIRED),
- *     ]);
+ *     $definition = new InputDefinition(array(
+ *       new InputArgument('name', InputArgument::REQUIRED),
+ *       new InputOption('foo', 'f', InputOption::VALUE_REQUIRED),
+ *     ));
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
@@ -33,6 +33,8 @@ class InputDefinition
     private $options;
     private $shortcuts;
     /**
+     * Constructor.
+     *
      * @param array $definition An array of InputArgument and InputOption instance
      */
     public function __construct(array $definition = array())
@@ -41,11 +43,13 @@ class InputDefinition
     }
     /**
      * Sets the definition of the input.
+     *
+     * @param array $definition The definition array
      */
     public function setDefinition(array $definition)
     {
-        $arguments = [];
-        $options = [];
+        $arguments = array();
+        $options = array();
         foreach ($definition as $item) {
             if ($item instanceof InputOption) {
                 $options[] = $item;
@@ -63,7 +67,7 @@ class InputDefinition
      */
     public function setArguments($arguments = array())
     {
-        $this->arguments = [];
+        $this->arguments = array();
         $this->requiredCount = 0;
         $this->hasOptional = false;
         $this->hasAnArrayArgument = false;
@@ -83,6 +87,10 @@ class InputDefinition
         }
     }
     /**
+     * Adds an InputArgument object.
+     *
+     * @param InputArgument $argument An InputArgument object
+     *
      * @throws LogicException When incorrect argument is given
      */
     public function addArgument(InputArgument $argument)
@@ -120,7 +128,7 @@ class InputDefinition
         if (!$this->hasArgument($name)) {
             throw new InvalidArgumentException(sprintf('The "%s" argument does not exist.', $name));
         }
-        $arguments = \is_int($name) ? array_values($this->arguments) : $this->arguments;
+        $arguments = is_int($name) ? array_values($this->arguments) : $this->arguments;
         return $arguments[$name];
     }
     /**
@@ -132,7 +140,7 @@ class InputDefinition
      */
     public function hasArgument($name)
     {
-        $arguments = \is_int($name) ? array_values($this->arguments) : $this->arguments;
+        $arguments = is_int($name) ? array_values($this->arguments) : $this->arguments;
         return isset($arguments[$name]);
     }
     /**
@@ -151,7 +159,7 @@ class InputDefinition
      */
     public function getArgumentCount()
     {
-        return $this->hasAnArrayArgument ? \PHP_INT_MAX : \count($this->arguments);
+        return $this->hasAnArrayArgument ? PHP_INT_MAX : count($this->arguments);
     }
     /**
      * Returns the number of required InputArguments.
@@ -169,7 +177,7 @@ class InputDefinition
      */
     public function getArgumentDefaults()
     {
-        $values = [];
+        $values = array();
         foreach ($this->arguments as $argument) {
             $values[$argument->getName()] = $argument->getDefault();
         }
@@ -182,8 +190,8 @@ class InputDefinition
      */
     public function setOptions($options = array())
     {
-        $this->options = [];
-        $this->shortcuts = [];
+        $this->options = array();
+        $this->shortcuts = array();
         $this->addOptions($options);
     }
     /**
@@ -198,6 +206,10 @@ class InputDefinition
         }
     }
     /**
+     * Adds an InputOption object.
+     *
+     * @param InputOption $option An InputOption object
+     *
      * @throws LogicException When option given already exist
      */
     public function addOption(InputOption $option)
@@ -272,7 +284,7 @@ class InputDefinition
     /**
      * Gets an InputOption by shortcut.
      *
-     * @param string $shortcut The Shortcut name
+     * @param string $shortcut the Shortcut name
      *
      * @return InputOption An InputOption object
      */
@@ -287,7 +299,7 @@ class InputDefinition
      */
     public function getOptionDefaults()
     {
-        $values = [];
+        $values = array();
         foreach ($this->options as $option) {
             $values[$option->getName()] = $option->getDefault();
         }
@@ -296,11 +308,13 @@ class InputDefinition
     /**
      * Returns the InputOption name given a shortcut.
      *
-     * @throws InvalidArgumentException When option given does not exist
+     * @param string $shortcut The shortcut
      *
-     * @internal
+     * @return string The InputOption name
+     *
+     * @throws InvalidArgumentException When option given does not exist
      */
-    public function shortcutToName(string $shortcut) : string
+    private function shortcutToName($shortcut)
     {
         if (!isset($this->shortcuts[$shortcut])) {
             throw new InvalidArgumentException(sprintf('The "-%s" option does not exist.', $shortcut));
@@ -316,7 +330,7 @@ class InputDefinition
      */
     public function getSynopsis($short = false)
     {
-        $elements = [];
+        $elements = array();
         if ($short && $this->getOptions()) {
             $elements[] = '[options]';
         } elseif (!$short) {
@@ -329,21 +343,21 @@ class InputDefinition
                 $elements[] = sprintf('[%s--%s%s]', $shortcut, $option->getName(), $value);
             }
         }
-        if (\count($elements) && $this->getArguments()) {
+        if (count($elements) && $this->getArguments()) {
             $elements[] = '[--]';
         }
-        $tail = '';
         foreach ($this->getArguments() as $argument) {
             $element = '<' . $argument->getName() . '>';
+            if (!$argument->isRequired()) {
+                $element = '[' . $element . ']';
+            } elseif ($argument->isArray()) {
+                $element = $element . ' (' . $element . ')';
+            }
             if ($argument->isArray()) {
                 $element .= '...';
             }
-            if (!$argument->isRequired()) {
-                $element = '[' . $element;
-                $tail .= ']';
-            }
             $elements[] = $element;
         }
-        return implode(' ', $elements) . $tail;
+        return implode(' ', $elements);
     }
 }

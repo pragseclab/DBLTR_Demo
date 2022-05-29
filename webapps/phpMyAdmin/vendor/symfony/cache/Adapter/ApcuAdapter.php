@@ -8,17 +8,100 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Symfony\Component\Cache\Adapter;
 
-use Symfony\Component\Cache\Traits\ApcuTrait;
+use Symfony\Component\Cache\CacheItem;
+use Symfony\Component\Cache\Exception\CacheException;
+
+/**
+ * @author Nicolas Grekas <p@tchwork.com>
+ */
 class ApcuAdapter extends AbstractAdapter
 {
-    use ApcuTrait;
-    /**
-     * @throws CacheException if APCu is not enabled
-     */
-    public function __construct(string $namespace = '', int $defaultLifetime = 0, string $version = null)
+    public static function isSupported()
     {
-        $this->init($namespace, $defaultLifetime, $version);
+        return function_exists('apcu_fetch') && ini_get('apc.enabled') && !('cli' === PHP_SAPI && !ini_get('apc.enable_cli'));
+    }
+
+    public function __construct($namespace = '', $defaultLifetime = 0, $version = null)
+    {
+        if (!static::isSupported()) {
+            throw new CacheException('APCu is not enabled');
+        }
+        if ('cli' === PHP_SAPI) {
+            ini_set('apc.use_request_time', 0);
+        }
+        parent::__construct($namespace, $defaultLifetime);
+
+        if (null !== $version) {
+            CacheItem::validateKey($version);
+
+            if (!apcu_exists($version.'@'.$namespace)) {
+                $this->doClear($namespace);
+                apcu_add($version.'@'.$namespace, null);
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function doFetch(array $ids)
+    {
+        try {
+            return apcu_fetch($ids);
+        } catch (\Error $e) {
+            throw new \ErrorException($e->getMessage(), $e->getCode(), E_ERROR, $e->getFile(), $e->getLine());
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function doHave($id)
+    {
+        return apcu_exists($id);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function doClear($namespace)
+    {
+        return isset($namespace[0]) && class_exists('APCuIterator', false)
+            ? apcu_delete(new \APCuIterator(sprintf('/^%s/', preg_quote($namespace, '/')), APC_ITER_KEY))
+            : apcu_clear_cache();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function doDelete(array $ids)
+    {
+        foreach ($ids as $id) {
+            apcu_delete($id);
+        }
+
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function doSave(array $values, $lifetime)
+    {
+        try {
+            return array_keys(apcu_store($values, null, $lifetime));
+        } catch (\Error $e) {
+        } catch (\Exception $e) {
+        }
+
+        if (1 === count($values)) {
+            // Workaround https://github.com/krakjoe/apcu/issues/170
+            apcu_delete(key($values));
+        }
+
+        throw $e;
     }
 }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This file is part of phpDocumentor.
  *
@@ -10,6 +9,7 @@
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @link      http://phpdoc.org
  */
+
 namespace phpDocumentor\Reflection\DocBlock\Tags;
 
 use phpDocumentor\Reflection\DocBlock\Description;
@@ -18,14 +18,17 @@ use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\FqsenResolver;
 use phpDocumentor\Reflection\Types\Context as TypeContext;
 use Webmozart\Assert\Assert;
+
 /**
  * Reflection class for a {@}uses tag in a Docblock.
  */
 final class Uses extends BaseTag implements Factory\StaticMethod
 {
     protected $name = 'uses';
+
     /** @var Fqsen */
     protected $refers = null;
+
     /**
      * Initializes this tag.
      *
@@ -34,19 +37,30 @@ final class Uses extends BaseTag implements Factory\StaticMethod
      */
     public function __construct(Fqsen $refers, Description $description = null)
     {
-        $this->refers = $refers;
+        $this->refers      = $refers;
         $this->description = $description;
     }
+
     /**
      * {@inheritdoc}
      */
-    public static function create($body, FqsenResolver $resolver = null, DescriptionFactory $descriptionFactory = null, TypeContext $context = null)
-    {
+    public static function create(
+        $body,
+        FqsenResolver $resolver = null,
+        DescriptionFactory $descriptionFactory = null,
+        TypeContext $context = null
+    ) {
         Assert::string($body);
         Assert::allNotNull([$resolver, $descriptionFactory]);
-        $parts = preg_split('/\\s+/Su', $body, 2);
-        return new static($resolver->resolve($parts[0], $context), $descriptionFactory->create(isset($parts[1]) ? $parts[1] : '', $context));
+
+        $parts = preg_split('/\s+/Su', $body, 2);
+
+        return new static(
+            $resolver->resolve($parts[0], $context),
+            $descriptionFactory->create(isset($parts[1]) ? $parts[1] : '', $context)
+        );
     }
+
     /**
      * Returns the structural element this tag refers to.
      *
@@ -56,6 +70,7 @@ final class Uses extends BaseTag implements Factory\StaticMethod
     {
         return $this->refers;
     }
+
     /**
      * Returns a string representation of this tag.
      *

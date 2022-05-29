@@ -8,11 +8,13 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Argument\Token;
 
 use SebastianBergmann\Comparator\ComparisonFailure;
 use Prophecy\Comparator\Factory as ComparatorFactory;
 use Prophecy\Util\StringUtil;
+
 /**
  * Object state-checker token.
  *
@@ -24,6 +26,7 @@ class ObjectStateToken implements TokenInterface
     private $value;
     private $util;
     private $comparatorFactory;
+
     /**
      * Initializes token.
      *
@@ -32,13 +35,19 @@ class ObjectStateToken implements TokenInterface
      * @param null|StringUtil   $util
      * @param ComparatorFactory $comparatorFactory
      */
-    public function __construct($methodName, $value, StringUtil $util = null, ComparatorFactory $comparatorFactory = null)
-    {
-        $this->name = $methodName;
+    public function __construct(
+        $methodName,
+        $value,
+        StringUtil $util = null,
+        ComparatorFactory $comparatorFactory = null
+    ) {
+        $this->name  = $methodName;
         $this->value = $value;
-        $this->util = $util ?: new StringUtil();
+        $this->util  = $util ?: new StringUtil;
+
         $this->comparatorFactory = $comparatorFactory ?: ComparatorFactory::getInstance();
     }
+
     /**
      * Scores 8 if argument is an object, which method returns expected value.
      *
@@ -50,7 +59,11 @@ class ObjectStateToken implements TokenInterface
     {
         if (is_object($argument) && method_exists($argument, $this->name)) {
             $actual = call_user_func(array($argument, $this->name));
-            $comparator = $this->comparatorFactory->getComparatorFor($this->value, $actual);
+
+            $comparator = $this->comparatorFactory->getComparatorFor(
+                $this->value, $actual
+            );
+
             try {
                 $comparator->assertEquals($this->value, $actual);
                 return 8;
@@ -58,11 +71,14 @@ class ObjectStateToken implements TokenInterface
                 return false;
             }
         }
+
         if (is_object($argument) && property_exists($argument, $this->name)) {
             return $argument->{$this->name} === $this->value ? 8 : false;
         }
+
         return false;
     }
+
     /**
      * Returns false.
      *
@@ -72,6 +88,7 @@ class ObjectStateToken implements TokenInterface
     {
         return false;
     }
+
     /**
      * Returns string representation for token.
      *
@@ -79,6 +96,9 @@ class ObjectStateToken implements TokenInterface
      */
     public function __toString()
     {
-        return sprintf('state(%s(), %s)', $this->name, $this->util->stringify($this->value));
+        return sprintf('state(%s(), %s)',
+            $this->name,
+            $this->util->stringify($this->value)
+        );
     }
 }

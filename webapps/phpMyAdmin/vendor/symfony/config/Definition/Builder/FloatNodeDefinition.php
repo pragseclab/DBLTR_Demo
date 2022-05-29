@@ -8,9 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Symfony\Component\Config\Definition\Builder;
 
 use Symfony\Component\Config\Definition\FloatNode;
+
 /**
  * This class provides a fluent interface for defining a float node.
  *
@@ -25,6 +27,6 @@ class FloatNodeDefinition extends NumericNodeDefinition
      */
     protected function instantiateNode()
     {
-        return new FloatNode($this->name, $this->parent, $this->min, $this->max, $this->pathSeparator);
+        return new FloatNode($this->name, $this->parent, $this->min, $this->max);
     }
 }

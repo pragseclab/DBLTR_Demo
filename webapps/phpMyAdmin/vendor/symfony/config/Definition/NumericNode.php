@@ -8,9 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Symfony\Component\Config\Definition;
 
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+
 /**
  * This node represents a numeric value in the config tree.
  *
@@ -20,18 +22,21 @@ class NumericNode extends ScalarNode
 {
     protected $min;
     protected $max;
-    public function __construct(?string $name, NodeInterface $parent = null, $min = null, $max = null, string $pathSeparator = BaseNode::DEFAULT_PATH_SEPARATOR)
+
+    public function __construct($name, NodeInterface $parent = null, $min = null, $max = null)
     {
-        parent::__construct($name, $parent, $pathSeparator);
+        parent::__construct($name, $parent);
         $this->min = $min;
         $this->max = $max;
     }
+
     /**
      * {@inheritdoc}
      */
     protected function finalizeValue($value)
     {
         $value = parent::finalizeValue($value);
+
         $errorMsg = null;
         if (isset($this->min) && $value < $this->min) {
             $errorMsg = sprintf('The value %s is too small for path "%s". Should be greater than or equal to %s', $value, $this->getPath(), $this->min);
@@ -44,8 +49,10 @@ class NumericNode extends ScalarNode
             $ex->setPath($this->getPath());
             throw $ex;
         }
+
         return $value;
     }
+
     /**
      * {@inheritdoc}
      */

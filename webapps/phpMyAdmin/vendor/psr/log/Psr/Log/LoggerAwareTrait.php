@@ -13,6 +13,7 @@ trait LoggerAwareTrait
      * @var LoggerInterface
      */
     protected $logger;
+
     /**
      * Sets a logger.
      *

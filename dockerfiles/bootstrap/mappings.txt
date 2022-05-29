@@ -1,2 +1,5 @@
-SET MP_PMA_alice 1
-SET MP_PMA_bob 2
+SET MP_PMA_alice 0
+SET MP_PMA_bob 0
+SET MP_PMA_david 0
+SET MP_PMA_charlie 1
+SET MP_PMA_eli 1

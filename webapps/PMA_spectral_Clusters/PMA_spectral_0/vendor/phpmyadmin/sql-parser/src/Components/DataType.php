@@ -3,19 +3,18 @@
 /**
  * Parses a data type.
  */
-declare (strict_types=1);
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function implode;
-use function strtolower;
-use function strtoupper;
-use function trim;
 /**
  * Parses a data type.
+ *
+ * @category   Components
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class DataType extends Component
 {
@@ -52,6 +51,8 @@ class DataType extends Component
      */
     public $options;
     /**
+     * Constructor.
+     *
      * @param string       $name       the name of this data type
      * @param array        $parameters the parameters (size or possible values)
      * @param OptionsArray $options    the options of this data type
@@ -67,11 +68,11 @@ class DataType extends Component
      * @param TokensList $list    the list of tokens that are being parsed
      * @param array      $options parameters for parsing
      *
-     * @return DataType|null
+     * @return DataType
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = new static();
+        $ret = new self();
         /**
          * The state of the parser.
          *
@@ -96,7 +97,7 @@ class DataType extends Component
                 continue;
             }
             if ($state === 0) {
-                $ret->name = strtoupper((string) $token->value);
+                $ret->name = strtoupper($token->value);
                 if ($token->type !== Token::TYPE_KEYWORD || !($token->flags & Token::FLAG_KEYWORD_DATA_TYPE)) {
                     $parser->error('Unrecognized data type.', $token);
                 }
@@ -126,11 +127,8 @@ class DataType extends Component
      */
     public static function build($component, array $options = array())
     {
-        $name = empty($options['lowercase']) ? $component->name : strtolower($component->name);
-        $parameters = '';
-        if (!empty($component->parameters)) {
-            $parameters = '(' . implode(',', $component->parameters) . ')';
-        }
-        return trim($name . $parameters . ' ' . $component->options);
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("build") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/DataType.php at line 156")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called build:156@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/DataType.php');
+        die();
     }
 }

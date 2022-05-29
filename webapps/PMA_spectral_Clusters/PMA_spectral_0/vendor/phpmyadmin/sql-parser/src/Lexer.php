@@ -7,17 +7,9 @@
  *
  * Depends on context to extract lexemes.
  */
-declare (strict_types=1);
 namespace PhpMyAdmin\SqlParser;
 
 use PhpMyAdmin\SqlParser\Exceptions\LexerException;
-use function define;
-use function defined;
-use function in_array;
-use function mb_strlen;
-use function sprintf;
-use function strlen;
-use function substr;
 if (!defined('USE_UTF_STRINGS')) {
     // NOTE: In previous versions of PHP (5.5 and older) the default
     // internal encoding is "ISO-8859-1".
@@ -36,6 +28,10 @@ if (!defined('USE_UTF_STRINGS')) {
  * tokens.
  *
  * The output of the lexer is affected by the context of the SQL statement.
+ *
+ * @category Lexer
+ *
+ * @license  https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  *
  * @see      Context
  */
@@ -143,11 +139,13 @@ class Lexer extends Core
      */
     public static function getTokens($str, $strict = false, $delimiter = null)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("getTokens") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Lexer.php at line 146")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called getTokens:146@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Lexer.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("getTokens") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Lexer.php at line 147")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called getTokens:147@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Lexer.php');
         die();
     }
     /**
+     * Constructor.
+     *
      * @param string|UtfString $str       the query to be lexed
      * @param bool             $strict    whether strict mode should be
      *                                    enabled or not
@@ -208,8 +206,7 @@ class Lexer extends Core
              */
             $token = null;
             foreach (static::$PARSER_METHODS as $method) {
-                $token = $this->{$method}();
-                if ($token) {
+                if ($token = $this->{$method}()) {
                     break;
                 }
             }
@@ -242,8 +239,7 @@ class Lexer extends Core
                 // Skipping last R (from `delimiteR`) and whitespaces between
                 // the keyword `DELIMITER` and the actual delimiter.
                 $pos = ++$this->last;
-                $token = $this->parseWhitespace();
-                if ($token !== null) {
+                if (($token = $this->parseWhitespace()) !== null) {
                     $token->position = $pos;
                     $list->tokens[$list->count++] = $token;
                 }
@@ -255,10 +251,8 @@ class Lexer extends Core
                 $pos = $this->last + 1;
                 // Parsing the delimiter.
                 $this->delimiter = null;
-                $delimiterLen = 0;
-                while (++$this->last < $this->len && !Context::isWhitespace($this->str[$this->last]) && $delimiterLen < 15) {
+                while (++$this->last < $this->len && !Context::isWhitespace($this->str[$this->last])) {
                     $this->delimiter .= $this->str[$this->last];
-                    ++$delimiterLen;
                 }
                 if (empty($this->delimiter)) {
                     $this->error('Expected delimiter.', '', $this->last);
@@ -277,36 +271,6 @@ class Lexer extends Core
         $list->tokens[$list->count++] = new Token(null, Token::TYPE_DELIMITER);
         // Saving the tokens list.
         $this->list = $list;
-        $this->solveAmbiguityOnStarOperator();
-    }
-    /**
-     * Resolves the ambiguity when dealing with the "*" operator.
-     *
-     * In SQL statements, the "*" operator can be an arithmetic operator (like in 2*3) or an SQL wildcard (like in
-     * SELECT a.* FROM ...). To solve this ambiguity, the solution is to find the next token, excluding whitespaces and
-     * comments, right after the "*" position. The "*" is for sure an SQL wildcard if the next token found is any of:
-     * - "FROM" (the FROM keyword like in "SELECT * FROM...");
-     * - "USING" (the USING keyword like in "DELETE table_name.* USING...");
-     * - "," (a comma separator like in "SELECT *, field FROM...");
-     * - ")" (a closing parenthesis like in "COUNT(*)").
-     * This methods will change the flag of the "*" tokens when any of those condition above is true. Otherwise, the
-     * default flag (arithmetic) will be kept.
-     *
-     * @return void
-     */
-    private function solveAmbiguityOnStarOperator()
-    {
-        $iBak = $this->list->idx;
-        while (($starToken = $this->list->getNextOfTypeAndValue(Token::TYPE_OPERATOR, '*')) !== null) {
-            // getNext() already gets rid of whitespaces and comments.
-            $next = $this->list->getNext();
-            if ($next !== null) {
-                if ($next->type === Token::TYPE_KEYWORD && in_array($next->value, ['FROM', 'USING'], true) || $next->type === Token::TYPE_OPERATOR && in_array($next->value, [',', ')'], true)) {
-                    $starToken->flags = Token::FLAG_OPERATOR_SQL;
-                }
-            }
-        }
-        $this->list->idx = $iBak;
     }
     /**
      * Creates a new error log.
@@ -316,18 +280,18 @@ class Lexer extends Core
      * @param int    $pos  the position of the character
      * @param int    $code the code of the error
      *
-     * @throws LexerException throws the exception, if strict mode is enabled.
+     * @throws LexerException throws the exception, if strict mode is enabled
      */
     public function error($msg, $str = '', $pos = 0, $code = 0)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("error") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Lexer.php at line 322")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called error:322@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Lexer.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("error") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Lexer.php at line 350")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called error:350@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Lexer.php');
         die();
     }
     /**
      * Parses a keyword.
      *
-     * @return Token|null
+     * @return null|Token
      */
     public function parseKeyword()
     {
@@ -364,8 +328,7 @@ class Lexer extends Core
                 $lastSpace = false;
             }
             $token .= $this->str[$this->last];
-            $flags = Context::isKeyword($token);
-            if (($this->last + 1 === $this->len || Context::isSeparator($this->str[$this->last + 1])) && $flags) {
+            if (($this->last + 1 === $this->len || Context::isSeparator($this->str[$this->last + 1])) && ($flags = Context::isKeyword($token))) {
                 $ret = new Token($token, Token::TYPE_KEYWORD, $flags);
                 $iEnd = $this->last;
                 // We don't break so we find longest keyword.
@@ -379,7 +342,7 @@ class Lexer extends Core
     /**
      * Parses a label.
      *
-     * @return Token|null
+     * @return null|Token
      */
     public function parseLabel()
     {
@@ -396,20 +359,29 @@ class Lexer extends Core
          * @var int
          */
         $iEnd = $this->last;
+        /**
+         * Whether last parsed character is a whitespace.
+         *
+         * @var bool
+         */
+        $lastSpace = false;
         for ($j = 1; $j < Context::LABEL_MAX_LENGTH && $this->last < $this->len; ++$j, ++$this->last) {
-            if ($this->str[$this->last] === ':' && $j > 1) {
-                // End of label
+            // Composed keywords shouldn't have more than one whitespace between
+            // keywords.
+            if (Context::isWhitespace($this->str[$this->last])) {
+                if ($lastSpace) {
+                    --$j;
+                    // The size of the keyword didn't increase.
+                    continue;
+                }
+                $lastSpace = true;
+            } elseif ($this->str[$this->last] === ':') {
                 $token .= $this->str[$this->last];
                 $ret = new Token($token, Token::TYPE_LABEL);
                 $iEnd = $this->last;
                 break;
-            } elseif (Context::isWhitespace($this->str[$this->last]) && $j > 1) {
-                // Whitespace between label and :
-                // The size of the keyword didn't increase.
-                --$j;
-            } elseif (Context::isSeparator($this->str[$this->last])) {
-                // Any other separator
-                break;
+            } else {
+                $lastSpace = false;
             }
             $token .= $this->str[$this->last];
         }
@@ -419,7 +391,7 @@ class Lexer extends Core
     /**
      * Parses an operator.
      *
-     * @return Token|null
+     * @return null|Token
      */
     public function parseOperator()
     {
@@ -438,8 +410,7 @@ class Lexer extends Core
         $iEnd = $this->last;
         for ($j = 1; $j < Context::OPERATOR_MAX_LENGTH && $this->last < $this->len; ++$j, ++$this->last) {
             $token .= $this->str[$this->last];
-            $flags = Context::isOperator($token);
-            if ($flags) {
+            if ($flags = Context::isOperator($token)) {
                 $ret = new Token($token, Token::TYPE_OPERATOR, $flags);
                 $iEnd = $this->last;
             }
@@ -450,7 +421,7 @@ class Lexer extends Core
     /**
      * Parses a whitespace.
      *
-     * @return Token|null
+     * @return null|Token
      */
     public function parseWhitespace()
     {
@@ -467,7 +438,7 @@ class Lexer extends Core
     /**
      * Parses a comment.
      *
-     * @return Token|null
+     * @return null|Token
      */
     public function parseComment()
     {
@@ -478,27 +449,12 @@ class Lexer extends Core
             while (++$this->last < $this->len && $this->str[$this->last] !== "\n") {
                 $token .= $this->str[$this->last];
             }
-            // Include trailing \n as whitespace token
-            if ($this->last < $this->len) {
-                --$this->last;
-            }
             return new Token($token, Token::TYPE_COMMENT, Token::FLAG_COMMENT_BASH);
         }
         // C style comments. (/*comment*\/)
         if (++$this->last < $this->len) {
             $token .= $this->str[$this->last];
             if (Context::isComment($token)) {
-                // There might be a conflict with "*" operator here, when string is "*/*".
-                // This can occurs in the following statements:
-                // - "SELECT */* comment */ FROM ..."
-                // - "SELECT 2*/* comment */3 AS `six`;"
-                $next = $this->last + 1;
-                if ($next < $this->len && $this->str[$next] === '*') {
-                    // Conflict in "*/*": first "*" was not for ending a comment.
-                    // Stop here and let other parsing method define the true behavior of that first star.
-                    $this->last = $iBak;
-                    return null;
-                }
                 $flags = Token::FLAG_COMMENT_C;
                 // This comment already ended. It may be a part of a
                 // previous MySQL specific command.
@@ -509,7 +465,7 @@ class Lexer extends Core
                 if ($this->last + 1 < $this->len && $this->str[$this->last + 1] === '!') {
                     $flags |= Token::FLAG_COMMENT_MYSQL_CMD;
                     $token .= $this->str[++$this->last];
-                    while (++$this->last < $this->len && $this->str[$this->last] >= '0' && $this->str[$this->last] <= '9') {
+                    while (++$this->last < $this->len && '0' <= $this->str[$this->last] && $this->str[$this->last] <= '9') {
                         $token .= $this->str[$this->last];
                     }
                     --$this->last;
@@ -531,23 +487,15 @@ class Lexer extends Core
         // SQL style comments. (-- comment\n)
         if (++$this->last < $this->len) {
             $token .= $this->str[$this->last];
-            $end = false;
-        } else {
-            --$this->last;
-            $end = true;
-        }
-        if (Context::isComment($token, $end)) {
-            // Checking if this comment did not end already (```--\n```).
-            if ($this->str[$this->last] !== "\n") {
-                while (++$this->last < $this->len && $this->str[$this->last] !== "\n") {
-                    $token .= $this->str[$this->last];
+            if (Context::isComment($token)) {
+                // Checking if this comment did not end already (```--\n```).
+                if ($this->str[$this->last] !== "\n") {
+                    while (++$this->last < $this->len && $this->str[$this->last] !== "\n") {
+                        $token .= $this->str[$this->last];
+                    }
                 }
+                return new Token($token, Token::TYPE_COMMENT, Token::FLAG_COMMENT_SQL);
             }
-            // Include trailing \n as whitespace token
-            if ($this->last < $this->len) {
-                --$this->last;
-            }
-            return new Token($token, Token::TYPE_COMMENT, Token::FLAG_COMMENT_SQL);
         }
         $this->last = $iBak;
         return null;
@@ -555,7 +503,7 @@ class Lexer extends Core
     /**
      * Parses a boolean.
      *
-     * @return Token|null
+     * @return null|Token
      */
     public function parseBool()
     {
@@ -582,7 +530,7 @@ class Lexer extends Core
     /**
      * Parses a number.
      *
-     * @return Token|null
+     * @return null|Token
      */
     public function parseNumber()
     {
@@ -622,7 +570,6 @@ class Lexer extends Core
         //
         // Valid final states are: 2, 3, 4 and 6. Any parsing that finished in a
         // state other than these is invalid.
-        // Also, negative states are invalid states.
         $iBak = $this->last;
         $token = '';
         $flags = 0;
@@ -654,9 +601,6 @@ class Lexer extends Core
                     $state = 4;
                 } elseif ($this->str[$this->last] === 'e' || $this->str[$this->last] === 'E') {
                     $state = 5;
-                } elseif ($this->str[$this->last] >= 'a' && $this->str[$this->last] <= 'z' || $this->str[$this->last] >= 'A' && $this->str[$this->last] <= 'Z') {
-                    // A number can't be directly followed by a letter
-                    $state = -$state;
                 } elseif ($this->str[$this->last] < '0' || $this->str[$this->last] > '9') {
                     // Just digits and `.`, `e` and `E` are valid characters.
                     break;
@@ -665,9 +609,6 @@ class Lexer extends Core
                 $flags |= Token::FLAG_NUMBER_FLOAT;
                 if ($this->str[$this->last] === 'e' || $this->str[$this->last] === 'E') {
                     $state = 5;
-                } elseif ($this->str[$this->last] >= 'a' && $this->str[$this->last] <= 'z' || $this->str[$this->last] >= 'A' && $this->str[$this->last] <= 'Z') {
-                    // A number can't be directly followed by a letter
-                    $state = -$state;
                 } elseif ($this->str[$this->last] < '0' || $this->str[$this->last] > '9') {
                     // Just digits, `e` and `E` are valid characters.
                     break;
@@ -676,9 +617,6 @@ class Lexer extends Core
                 $flags |= Token::FLAG_NUMBER_APPROXIMATE;
                 if ($this->str[$this->last] === '+' || $this->str[$this->last] === '-' || $this->str[$this->last] >= '0' && $this->str[$this->last] <= '9') {
                     $state = 6;
-                } elseif ($this->str[$this->last] >= 'a' && $this->str[$this->last] <= 'z' || $this->str[$this->last] >= 'A' && $this->str[$this->last] <= 'Z') {
-                    // A number can't be directly followed by a letter
-                    $state = -$state;
                 } else {
                     break;
                 }
@@ -717,15 +655,12 @@ class Lexer extends Core
      *
      * @param string $quote additional starting symbol
      *
-     * @return Token|null
-     *
-     * @throws LexerException
+     * @return null|Token
      */
     public function parseString($quote = '')
     {
         $token = $this->str[$this->last];
-        $flags = Context::isString($token);
-        if (!$flags && $token !== $quote) {
+        if (!($flags = Context::isString($token)) && $token !== $quote) {
             return null;
         }
         $quote = $token;
@@ -749,15 +684,12 @@ class Lexer extends Core
     /**
      * Parses a symbol.
      *
-     * @return Token|null
-     *
-     * @throws LexerException
+     * @return null|Token
      */
     public function parseSymbol()
     {
         $token = $this->str[$this->last];
-        $flags = Context::isSymbol($token);
-        if (!$flags) {
+        if (!($flags = Context::isSymbol($token))) {
             return null;
         }
         if ($flags & Token::FLAG_SYMBOL_VARIABLE) {
@@ -766,19 +698,13 @@ class Lexer extends Core
                 $token .= $this->str[$this->last++];
                 $flags |= Token::FLAG_SYMBOL_SYSTEM;
             }
-        } elseif ($flags & Token::FLAG_SYMBOL_PARAMETER) {
-            if ($token !== '?' && $this->last + 1 < $this->len) {
-                ++$this->last;
-            }
         } else {
             $token = '';
         }
         $str = null;
         if ($this->last < $this->len) {
-            $str = $this->parseString('`');
-            if ($str === null) {
-                $str = $this->parseUnknown();
-                if ($str === null) {
+            if (($str = $this->parseString('`')) === null) {
+                if (($str = static::parseUnknown()) === null) {
                     $this->error('Variable name was expected.', $this->str[$this->last], $this->last);
                 }
             }
@@ -791,7 +717,7 @@ class Lexer extends Core
     /**
      * Parses unknown parts of the query.
      *
-     * @return Token|null
+     * @return null|Token
      */
     public function parseUnknown()
     {
@@ -801,12 +727,6 @@ class Lexer extends Core
         }
         while (++$this->last < $this->len && !Context::isSeparator($this->str[$this->last])) {
             $token .= $this->str[$this->last];
-            // Test if end of token equals the current delimiter. If so, remove it from the token.
-            if (substr($token, -$this->delimiterLen) === $this->delimiter) {
-                $token = substr($token, 0, -$this->delimiterLen);
-                $this->last -= $this->delimiterLen - 1;
-                break;
-            }
         }
         --$this->last;
         return new Token($token);
@@ -814,7 +734,7 @@ class Lexer extends Core
     /**
      * Parses the delimiter of the query.
      *
-     * @return Token|null
+     * @return null|Token
      */
     public function parseDelimiter()
     {

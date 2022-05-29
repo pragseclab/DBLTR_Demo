@@ -3,7 +3,6 @@
 /**
  * Parses a list of options.
  */
-declare (strict_types=1);
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
@@ -11,16 +10,12 @@ use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
 use PhpMyAdmin\SqlParser\Translator;
-use function array_merge_recursive;
-use function count;
-use function implode;
-use function is_array;
-use function ksort;
-use function sprintf;
-use function strcasecmp;
-use function strtoupper;
 /**
  * Parses a list of options.
+ *
+ * @category   Components
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class OptionsArray extends Component
 {
@@ -31,6 +26,8 @@ class OptionsArray extends Component
      */
     public $options = array();
     /**
+     * Constructor.
+     *
      * @param array $options The array of options. Options that have a value
      *                       must be an array with at least two keys `name` and
      *                       `expr` or `value`.
@@ -48,7 +45,7 @@ class OptionsArray extends Component
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = new static();
+        $ret = new self();
         /**
          * The ID that will be assigned to duplicate options.
          *
@@ -145,7 +142,7 @@ class OptionsArray extends Component
                     // This is only the beginning. The value is parsed in state
                     // 1 and 2. State 1 is used to skip the first equals sign
                     // and state 2 to parse the actual value.
-                    $ret->options[$lastOptionId] = [
+                    $ret->options[$lastOptionId] = array(
                         // @var string The name of the option.
                         'name' => $token->value,
                         // @var bool Whether it contains an equal sign.
@@ -155,14 +152,14 @@ class OptionsArray extends Component
                         'expr' => '',
                         // @var string Processed value.
                         'value' => '',
-                    ];
+                    );
                     $state = 1;
                 } elseif ($lastOption[1] === 'expr' || $lastOption[1] === 'expr=') {
                     // This is a keyword that is followed by an expression.
                     // The expression is used by the specialized parser.
                     // Skipping this option in order to parse the expression.
                     ++$list->idx;
-                    $ret->options[$lastOptionId] = [
+                    $ret->options[$lastOptionId] = array(
                         // @var string The name of the option.
                         'name' => $token->value,
                         // @var bool Whether it contains an equal sign.
@@ -170,7 +167,7 @@ class OptionsArray extends Component
                         'equals' => $lastOption[1] === 'expr=',
                         // @var Expression The parsed expression.
                         'expr' => '',
-                    ];
+                    );
                     $state = 1;
                 }
             } elseif ($state === 1) {
@@ -184,7 +181,7 @@ class OptionsArray extends Component
             // change this iteration.
             if ($state === 2) {
                 if ($lastOption[1] === 'expr' || $lastOption[1] === 'expr=') {
-                    $ret->options[$lastOptionId]['expr'] = Expression::parse($parser, $list, empty($lastOption[2]) ? [] : $lastOption[2]);
+                    $ret->options[$lastOptionId]['expr'] = Expression::parse($parser, $list, empty($lastOption[2]) ? array() : $lastOption[2]);
                     $ret->options[$lastOptionId]['value'] = $ret->options[$lastOptionId]['expr']->expr;
                     $lastOption = null;
                     $state = 0;
@@ -210,7 +207,7 @@ class OptionsArray extends Component
          * We reached the end of statement without getting a value
          * for an option for which a value was required
          */
-        if ($state === 1 && $lastOption && ($lastOption[1] === 'expr' || $lastOption[1] === 'var' || $lastOption[1] === 'var=' || $lastOption[1] === 'expr=')) {
+        if ($state === 1 && $lastOption && ($lastOption[1] == 'expr' || $lastOption[1] == 'var' || $lastOption[1] == 'var=' || $lastOption[1] == 'expr=')) {
             $parser->error(sprintf('Value/Expression for the option %1$s was expected.', $ret->options[$lastOptionId]['name']), $list->tokens[$list->idx - 1]);
         }
         if (empty($options['_UNSORTED'])) {
@@ -227,18 +224,9 @@ class OptionsArray extends Component
      */
     public static function build($component, array $options = array())
     {
-        if (empty($component->options)) {
-            return '';
-        }
-        $options = [];
-        foreach ($component->options as $option) {
-            if (!is_array($option)) {
-                $options[] = $option;
-            } else {
-                $options[] = $option['name'] . (!empty($option['equals']) && $option['equals'] ? '=' : ' ') . (!empty($option['expr']) ? $option['expr'] : $option['value']);
-            }
-        }
-        return implode(' ', $options);
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("build") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/OptionsArray.php at line 281")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called build:281@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/OptionsArray.php');
+        die();
     }
     /**
      * Checks if it has the specified option and returns it value or true.
@@ -271,18 +259,9 @@ class OptionsArray extends Component
      */
     public function remove($key)
     {
-        foreach ($this->options as $idx => $option) {
-            if (is_array($option)) {
-                if (!strcasecmp($key, $option['name'])) {
-                    unset($this->options[$idx]);
-                    return true;
-                }
-            } elseif (!strcasecmp($key, $option)) {
-                unset($this->options[$idx]);
-                return true;
-            }
-        }
-        return false;
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("remove") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/OptionsArray.php at line 332")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called remove:332@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/OptionsArray.php');
+        die();
     }
     /**
      * Merges the specified options with these ones. Values with same ID will be
@@ -292,8 +271,8 @@ class OptionsArray extends Component
      */
     public function merge($options)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("merge") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/OptionsArray.php at line 295")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called merge:295@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/OptionsArray.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("merge") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/OptionsArray.php at line 357")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called merge:357@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/OptionsArray.php');
         die();
     }
     /**
@@ -303,6 +282,8 @@ class OptionsArray extends Component
      */
     public function isEmpty()
     {
-        return empty($this->options);
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("isEmpty") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/OptionsArray.php at line 371")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called isEmpty:371@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/OptionsArray.php');
+        die();
     }
 }

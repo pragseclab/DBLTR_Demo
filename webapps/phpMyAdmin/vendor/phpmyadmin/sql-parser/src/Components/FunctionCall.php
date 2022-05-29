@@ -3,16 +3,20 @@
 /**
  * Parses a function call.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function is_array;
+
 /**
  * Parses a function call.
+ *
+ * @category   Keywords
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class FunctionCall extends Component
 {
@@ -22,13 +26,17 @@ class FunctionCall extends Component
      * @var string
      */
     public $name;
+
     /**
      * The list of parameters.
      *
      * @var ArrayObj
      */
     public $parameters;
+
     /**
+     * Constructor.
+     *
      * @param string         $name       the name of the function to be called
      * @param array|ArrayObj $parameters the parameters of this function
      */
@@ -41,6 +49,7 @@ class FunctionCall extends Component
             $this->parameters = $parameters;
         }
     }
+
     /**
      * @param Parser     $parser  the parser that serves as context
      * @param TokensList $list    the list of tokens that are being parsed
@@ -50,7 +59,8 @@ class FunctionCall extends Component
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = new static();
+        $ret = new self();
+
         /**
          * The state of the parser.
          *
@@ -63,6 +73,7 @@ class FunctionCall extends Component
          * @var int
          */
         $state = 0;
+
         for (; $list->idx < $list->count; ++$list->idx) {
             /**
              * Token parsed at this moment.
@@ -70,26 +81,31 @@ class FunctionCall extends Component
              * @var Token
              */
             $token = $list->tokens[$list->idx];
+
             // End of statement.
             if ($token->type === Token::TYPE_DELIMITER) {
                 break;
             }
+
             // Skipping whitespaces and comments.
-            if ($token->type === Token::TYPE_WHITESPACE || $token->type === Token::TYPE_COMMENT) {
+            if (($token->type === Token::TYPE_WHITESPACE) || ($token->type === Token::TYPE_COMMENT)) {
                 continue;
             }
+
             if ($state === 0) {
                 $ret->name = $token->value;
                 $state = 1;
             } elseif ($state === 1) {
-                if ($token->type === Token::TYPE_OPERATOR && $token->value === '(') {
+                if (($token->type === Token::TYPE_OPERATOR) && ($token->value === '(')) {
                     $ret->parameters = ArrayObj::parse($parser, $list);
                 }
                 break;
             }
         }
+
         return $ret;
     }
+
     /**
      * @param FunctionCall $component the component to be built
      * @param array        $options   parameters for building

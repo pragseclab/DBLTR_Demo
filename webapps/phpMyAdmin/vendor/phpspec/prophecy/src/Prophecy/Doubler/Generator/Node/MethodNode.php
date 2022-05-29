@@ -8,10 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Doubler\Generator\Node;
 
-use Prophecy\Doubler\Generator\TypeHintReference;
 use Prophecy\Exception\InvalidArgumentException;
+
 /**
  * Method node.
  *
@@ -26,63 +27,73 @@ class MethodNode
     private $returnsReference = false;
     private $returnType;
     private $nullableReturnType = false;
+
     /**
      * @var ArgumentNode[]
      */
     private $arguments = array();
-    /**
-     * @var TypeHintReference
-     */
-    private $typeHintReference;
+
     /**
      * @param string $name
      * @param string $code
      */
-    public function __construct($name, $code = null, TypeHintReference $typeHintReference = null)
+    public function __construct($name, $code = null)
     {
         $this->name = $name;
         $this->code = $code;
-        $this->typeHintReference = $typeHintReference ?: new TypeHintReference();
     }
+
     public function getVisibility()
     {
         return $this->visibility;
     }
+
     /**
      * @param string $visibility
      */
     public function setVisibility($visibility)
     {
         $visibility = strtolower($visibility);
+
         if (!in_array($visibility, array('public', 'private', 'protected'))) {
-            throw new InvalidArgumentException(sprintf('`%s` method visibility is not supported.', $visibility));
+            throw new InvalidArgumentException(sprintf(
+                '`%s` method visibility is not supported.', $visibility
+            ));
         }
+
         $this->visibility = $visibility;
     }
+
     public function isStatic()
     {
         return $this->static;
     }
+
     public function setStatic($static = true)
     {
         $this->static = (bool) $static;
     }
+
     public function returnsReference()
     {
         return $this->returnsReference;
     }
+
     public function setReturnsReference()
     {
         $this->returnsReference = true;
     }
+
     public function getName()
     {
         return $this->name;
     }
+
     public function addArgument(ArgumentNode $argument)
     {
         $this->arguments[] = $argument;
     }
+
     /**
      * @return ArgumentNode[]
      */
@@ -90,29 +101,56 @@ class MethodNode
     {
         return $this->arguments;
     }
+
     public function hasReturnType()
     {
         return null !== $this->returnType;
     }
+
     /**
      * @param string $type
      */
     public function setReturnType($type = null)
     {
-        if ($type === '' || $type === null) {
-            $this->returnType = null;
-            return;
+        switch ($type) {
+            case '':
+                $this->returnType = null;
+                break;
+
+            case 'string';
+            case 'float':
+            case 'int':
+            case 'bool':
+            case 'array':
+            case 'callable':
+            case 'iterable':
+            case 'void':
+                $this->returnType = $type;
+                break;
+
+            case 'double':
+            case 'real':
+                $this->returnType = 'float';
+                break;
+
+            case 'boolean':
+                $this->returnType = 'bool';
+                break;
+
+            case 'integer':
+                $this->returnType = 'int';
+                break;
+
+            default:
+                $this->returnType = '\\' . ltrim($type, '\\');
         }
-        $typeMap = array('double' => 'float', 'real' => 'float', 'boolean' => 'bool', 'integer' => 'int');
-        if (isset($typeMap[$type])) {
-            $type = $typeMap[$type];
-        }
-        $this->returnType = $this->typeHintReference->isBuiltInReturnTypeHint($type) ? $type : '\\' . ltrim($type, '\\');
     }
+
     public function getReturnType()
     {
         return $this->returnType;
     }
+
     /**
      * @param bool $bool
      */
@@ -120,6 +158,7 @@ class MethodNode
     {
         $this->nullableReturnType = (bool) $bool;
     }
+
     /**
      * @return bool
      */
@@ -127,6 +166,7 @@ class MethodNode
     {
         return $this->nullableReturnType;
     }
+
     /**
      * @param string $code
      */
@@ -134,23 +174,34 @@ class MethodNode
     {
         $this->code = $code;
     }
+
     public function getCode()
     {
-        if ($this->returnsReference) {
-            return "throw new \\Prophecy\\Exception\\Doubler\\ReturnByReferenceException('Returning by reference not supported', get_class(\$this), '{$this->name}');";
+        if ($this->returnsReference)
+        {
+            return "throw new \Prophecy\Exception\Doubler\ReturnByReferenceException('Returning by reference not supported', get_class(\$this), '{$this->name}');";
         }
+
         return (string) $this->code;
     }
+
     public function useParentCode()
     {
-        $this->code = sprintf('return parent::%s(%s);', $this->getName(), implode(', ', array_map(array($this, 'generateArgument'), $this->arguments)));
+        $this->code = sprintf(
+            'return parent::%s(%s);', $this->getName(), implode(', ',
+                array_map(array($this, 'generateArgument'), $this->arguments)
+            )
+        );
     }
+
     private function generateArgument(ArgumentNode $arg)
     {
-        $argument = '$' . $arg->getName();
+        $argument = '$'.$arg->getName();
+
         if ($arg->isVariadic()) {
-            $argument = '...' . $argument;
+            $argument = '...'.$argument;
         }
+
         return $argument;
     }
 }

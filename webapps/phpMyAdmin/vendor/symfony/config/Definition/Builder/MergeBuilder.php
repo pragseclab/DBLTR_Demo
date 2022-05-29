@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Symfony\Component\Config\Definition\Builder;
 
 /**
@@ -20,10 +21,17 @@ class MergeBuilder
     protected $node;
     public $allowFalse = false;
     public $allowOverwrite = true;
+
+    /**
+     * Constructor.
+     *
+     * @param NodeDefinition $node The related node
+     */
     public function __construct(NodeDefinition $node)
     {
         $this->node = $node;
     }
+
     /**
      * Sets whether the node can be unset.
      *
@@ -34,8 +42,10 @@ class MergeBuilder
     public function allowUnset($allow = true)
     {
         $this->allowFalse = $allow;
+
         return $this;
     }
+
     /**
      * Sets whether the node can be overwritten.
      *
@@ -46,8 +56,10 @@ class MergeBuilder
     public function denyOverwrite($deny = true)
     {
         $this->allowOverwrite = !$deny;
+
         return $this;
     }
+
     /**
      * Returns the related node.
      *

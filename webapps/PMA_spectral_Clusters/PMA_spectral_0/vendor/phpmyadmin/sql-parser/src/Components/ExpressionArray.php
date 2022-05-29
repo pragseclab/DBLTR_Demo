@@ -3,22 +3,18 @@
 /**
  * Parses a list of expressions delimited by a comma.
  */
-declare (strict_types=1);
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
-use PhpMyAdmin\SqlParser\Exceptions\ParserException;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function count;
-use function implode;
-use function is_array;
-use function preg_match;
-use function strlen;
-use function substr;
 /**
  * Parses a list of expressions delimited by a comma.
+ *
+ * @category   Keywords
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class ExpressionArray extends Component
 {
@@ -28,12 +24,10 @@ class ExpressionArray extends Component
      * @param array      $options parameters for parsing
      *
      * @return Expression[]
-     *
-     * @throws ParserException
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = [];
+        $ret = array();
         /**
          * The state of the parser.
          *
@@ -89,30 +83,18 @@ class ExpressionArray extends Component
             $parser->error('An expression was expected.', $list->tokens[$list->idx]);
         }
         --$list->idx;
-        if (is_array($ret)) {
-            $retIndex = count($ret) - 1;
-            if (isset($ret[$retIndex])) {
-                $expr = $ret[$retIndex]->expr;
-                if (preg_match('/\\s*--\\s.*$/', $expr, $matches)) {
-                    $found = $matches[0];
-                    $ret[$retIndex]->expr = substr($expr, 0, strlen($expr) - strlen($found));
-                }
-            }
-        }
         return $ret;
     }
     /**
-     * @param Expression[] $component the component to be built
-     * @param array        $options   parameters for building
+     * @param ExpressionArray[] $component the component to be built
+     * @param array             $options   parameters for building
      *
      * @return string
      */
     public static function build($component, array $options = array())
     {
-        $ret = [];
-        foreach ($component as $frag) {
-            $ret[] = $frag::build($frag);
-        }
-        return implode(', ', $ret);
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("build") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/ExpressionArray.php at line 120")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called build:120@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/ExpressionArray.php');
+        die();
     }
 }

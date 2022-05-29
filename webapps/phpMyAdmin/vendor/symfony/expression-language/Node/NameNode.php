@@ -18,9 +18,9 @@ use Symfony\Component\ExpressionLanguage\Compiler;
  */
 class NameNode extends Node
 {
-    public function __construct(string $name)
+    public function __construct($name)
     {
-        parent::__construct([], ['name' => $name]);
+        parent::__construct(array(), array('name' => $name));
     }
     public function compile(Compiler $compiler)
     {
@@ -32,6 +32,6 @@ class NameNode extends Node
     }
     public function toArray()
     {
-        return [$this->attributes['name']];
+        return array($this->attributes['name']);
     }
 }

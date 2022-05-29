@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of PHPUnit.
  *
@@ -8,67 +7,73 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace PHPUnit\Framework\Constraint;
 
-use SplObjectStorage;
 /**
  * Constraint that asserts that the Traversable it is applied to contains
  * a given value.
+ *
+ * @since Class available since Release 3.0.0
  */
-class TraversableContains extends Constraint
+class PHPUnit_Framework_Constraint_TraversableContains extends PHPUnit_Framework_Constraint
 {
     /**
      * @var bool
      */
-    private $checkForObjectIdentity;
+    protected $checkForObjectIdentity;
+
     /**
      * @var bool
      */
-    private $checkForNonObjectIdentity;
+    protected $checkForNonObjectIdentity;
+
     /**
      * @var mixed
      */
-    private $value;
+    protected $value;
+
     /**
-     * @throws \PHPUnit\Framework\Exception
+     * @param mixed $value
+     * @param bool  $checkForObjectIdentity
+     * @param bool  $checkForNonObjectIdentity
+     *
+     * @throws PHPUnit_Framework_Exception
      */
-    public function __construct($value, bool $checkForObjectIdentity = true, bool $checkForNonObjectIdentity = false)
+    public function __construct($value, $checkForObjectIdentity = true, $checkForNonObjectIdentity = false)
     {
         parent::__construct();
-        $this->checkForObjectIdentity = $checkForObjectIdentity;
-        $this->checkForNonObjectIdentity = $checkForNonObjectIdentity;
-        $this->value = $value;
-    }
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
-     */
-    public function toString() : string
-    {
-        if (\is_string($this->value) && \strpos($this->value, "\n") !== false) {
-            return 'contains "' . $this->value . '"';
+
+        if (!is_bool($checkForObjectIdentity)) {
+            throw PHPUnit_Util_InvalidArgumentHelper::factory(2, 'boolean');
         }
-        return 'contains ' . $this->exporter->export($this->value);
+
+        if (!is_bool($checkForNonObjectIdentity)) {
+            throw PHPUnit_Util_InvalidArgumentHelper::factory(3, 'boolean');
+        }
+
+        $this->checkForObjectIdentity    = $checkForObjectIdentity;
+        $this->checkForNonObjectIdentity = $checkForNonObjectIdentity;
+        $this->value                     = $value;
     }
+
     /**
      * Evaluates the constraint for parameter $other. Returns true if the
      * constraint is met, false otherwise.
      *
-     * @param mixed $other value or object to evaluate
+     * @param mixed $other Value or object to evaluate.
+     *
+     * @return bool
      */
-    protected function matches($other) : bool
+    protected function matches($other)
     {
         if ($other instanceof SplObjectStorage) {
             return $other->contains($this->value);
         }
-        if (\is_object($this->value)) {
+
+        if (is_object($this->value)) {
             foreach ($other as $element) {
                 if ($this->checkForObjectIdentity && $element === $this->value) {
                     return true;
-                }
-                /* @noinspection TypeUnsafeComparisonInspection */
-                if (!$this->checkForObjectIdentity && $element == $this->value) {
+                } elseif (!$this->checkForObjectIdentity && $element == $this->value) {
                     return true;
                 }
             }
@@ -76,27 +81,45 @@ class TraversableContains extends Constraint
             foreach ($other as $element) {
                 if ($this->checkForNonObjectIdentity && $element === $this->value) {
                     return true;
-                }
-                /* @noinspection TypeUnsafeComparisonInspection */
-                if (!$this->checkForNonObjectIdentity && $element == $this->value) {
+                } elseif (!$this->checkForNonObjectIdentity && $element == $this->value) {
                     return true;
                 }
             }
         }
+
         return false;
     }
+
+    /**
+     * Returns a string representation of the constraint.
+     *
+     * @return string
+     */
+    public function toString()
+    {
+        if (is_string($this->value) && strpos($this->value, "\n") !== false) {
+            return 'contains "' . $this->value . '"';
+        } else {
+            return 'contains ' . $this->exporter->export($this->value);
+        }
+    }
+
     /**
      * Returns the description of the failure
      *
      * The beginning of failure messages is "Failed asserting that" in most
      * cases. This method should return the second part of that sentence.
      *
-     * @param mixed $other evaluated value or object
+     * @param mixed $other Evaluated value or object.
      *
-     * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
+     * @return string
      */
-    protected function failureDescription($other) : string
+    protected function failureDescription($other)
     {
-        return \sprintf('%s %s', \is_array($other) ? 'an array' : 'a traversable', $this->toString());
+        return sprintf(
+            '%s %s',
+            is_array($other) ? 'an array' : 'a traversable',
+            $this->toString()
+        );
     }
 }

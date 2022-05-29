@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Prophecy;
 
 use SebastianBergmann\Comparator\ComparisonFailure;
@@ -20,6 +21,7 @@ use Prophecy\Exception\Prophecy\ObjectProphecyException;
 use Prophecy\Exception\Prophecy\MethodProphecyException;
 use Prophecy\Exception\Prediction\AggregateException;
 use Prophecy\Exception\Prediction\PredictionException;
+
 /**
  * Object prophecy.
  *
@@ -31,10 +33,12 @@ class ObjectProphecy implements ProphecyInterface
     private $callCenter;
     private $revealer;
     private $comparatorFactory;
+
     /**
      * @var MethodProphecy[][]
      */
     private $methodProphecies = array();
+
     /**
      * Initializes object prophecy.
      *
@@ -43,13 +47,19 @@ class ObjectProphecy implements ProphecyInterface
      * @param RevealerInterface $revealer
      * @param ComparatorFactory $comparatorFactory
      */
-    public function __construct(LazyDouble $lazyDouble, CallCenter $callCenter = null, RevealerInterface $revealer = null, ComparatorFactory $comparatorFactory = null)
-    {
+    public function __construct(
+        LazyDouble $lazyDouble,
+        CallCenter $callCenter = null,
+        RevealerInterface $revealer = null,
+        ComparatorFactory $comparatorFactory = null
+    ) {
         $this->lazyDouble = $lazyDouble;
-        $this->callCenter = $callCenter ?: new CallCenter();
-        $this->revealer = $revealer ?: new Revealer();
+        $this->callCenter = $callCenter ?: new CallCenter;
+        $this->revealer   = $revealer ?: new Revealer;
+
         $this->comparatorFactory = $comparatorFactory ?: ComparatorFactory::getInstance();
     }
+
     /**
      * Forces double to extend specific class.
      *
@@ -60,8 +70,10 @@ class ObjectProphecy implements ProphecyInterface
     public function willExtend($class)
     {
         $this->lazyDouble->setParentClass($class);
+
         return $this;
     }
+
     /**
      * Forces double to implement specific interface.
      *
@@ -72,8 +84,10 @@ class ObjectProphecy implements ProphecyInterface
     public function willImplement($interface)
     {
         $this->lazyDouble->addInterface($interface);
+
         return $this;
     }
+
     /**
      * Sets constructor arguments.
      *
@@ -84,8 +98,10 @@ class ObjectProphecy implements ProphecyInterface
     public function willBeConstructedWith(array $arguments = null)
     {
         $this->lazyDouble->setArguments($arguments);
+
         return $this;
     }
+
     /**
      * Reveals double.
      *
@@ -96,12 +112,20 @@ class ObjectProphecy implements ProphecyInterface
     public function reveal()
     {
         $double = $this->lazyDouble->getInstance();
+
         if (null === $double || !$double instanceof ProphecySubjectInterface) {
-            throw new ObjectProphecyException("Generated double must implement ProphecySubjectInterface, but it does not.\n" . 'It seems you have wrongly configured doubler without required ClassPatch.', $this);
+            throw new ObjectProphecyException(
+                "Generated double must implement ProphecySubjectInterface, but it does not.\n".
+                'It seems you have wrongly configured doubler without required ClassPatch.',
+                $this
+            );
         }
+
         $double->setProphecy($this);
+
         return $double;
     }
+
     /**
      * Adds method prophecy to object prophecy.
      *
@@ -114,14 +138,23 @@ class ObjectProphecy implements ProphecyInterface
     {
         $argumentsWildcard = $methodProphecy->getArgumentsWildcard();
         if (null === $argumentsWildcard) {
-            throw new MethodProphecyException(sprintf("Can not add prophecy for a method `%s::%s()`\n" . "as you did not specify arguments wildcard for it.", get_class($this->reveal()), $methodProphecy->getMethodName()), $methodProphecy);
+            throw new MethodProphecyException(sprintf(
+                "Can not add prophecy for a method `%s::%s()`\n".
+                "as you did not specify arguments wildcard for it.",
+                get_class($this->reveal()),
+                $methodProphecy->getMethodName()
+            ), $methodProphecy);
         }
-        $methodName = strtolower($methodProphecy->getMethodName());
+
+        $methodName = $methodProphecy->getMethodName();
+
         if (!isset($this->methodProphecies[$methodName])) {
             $this->methodProphecies[$methodName] = array();
         }
+
         $this->methodProphecies[$methodName][] = $methodProphecy;
     }
+
     /**
      * Returns either all or related to single method prophecies.
      *
@@ -134,12 +167,14 @@ class ObjectProphecy implements ProphecyInterface
         if (null === $methodName) {
             return $this->methodProphecies;
         }
-        $methodName = strtolower($methodName);
+
         if (!isset($this->methodProphecies[$methodName])) {
             return array();
         }
+
         return $this->methodProphecies[$methodName];
     }
+
     /**
      * Makes specific method call.
      *
@@ -151,9 +186,11 @@ class ObjectProphecy implements ProphecyInterface
     public function makeProphecyMethodCall($methodName, array $arguments)
     {
         $arguments = $this->revealer->reveal($arguments);
-        $return = $this->callCenter->makeCall($this, $methodName, $arguments);
+        $return    = $this->callCenter->makeCall($this, $methodName, $arguments);
+
         return $this->revealer->reveal($return);
     }
+
     /**
      * Finds calls by method name & arguments wildcard.
      *
@@ -166,17 +203,17 @@ class ObjectProphecy implements ProphecyInterface
     {
         return $this->callCenter->findCalls($methodName, $wildcard);
     }
+
     /**
      * Checks that registered method predictions do not fail.
      *
      * @throws \Prophecy\Exception\Prediction\AggregateException If any of registered predictions fail
-     * @throws \Prophecy\Exception\Call\UnexpectedCallException
      */
     public function checkProphecyMethodsPredictions()
     {
         $exception = new AggregateException(sprintf("%s:\n", get_class($this->reveal())));
         $exception->setObjectProphecy($this);
-        $this->callCenter->checkUnexpectedCalls();
+
         foreach ($this->methodProphecies as $prophecies) {
             foreach ($prophecies as $prophecy) {
                 try {
@@ -186,10 +223,12 @@ class ObjectProphecy implements ProphecyInterface
                 }
             }
         }
+
         if (count($exception->getExceptions())) {
             throw $exception;
         }
     }
+
     /**
      * Creates new method prophecy using specified method name and arguments.
      *
@@ -201,17 +240,22 @@ class ObjectProphecy implements ProphecyInterface
     public function __call($methodName, array $arguments)
     {
         $arguments = new ArgumentsWildcard($this->revealer->reveal($arguments));
+
         foreach ($this->getMethodProphecies($methodName) as $prophecy) {
             $argumentsWildcard = $prophecy->getArgumentsWildcard();
-            $comparator = $this->comparatorFactory->getComparatorFor($argumentsWildcard, $arguments);
+            $comparator = $this->comparatorFactory->getComparatorFor(
+                $argumentsWildcard, $arguments
+            );
+
             try {
                 $comparator->assertEquals($argumentsWildcard, $arguments);
                 return $prophecy;
-            } catch (ComparisonFailure $failure) {
-            }
+            } catch (ComparisonFailure $failure) {}
         }
+
         return new MethodProphecy($this, $methodName, $arguments);
     }
+
     /**
      * Tries to get property value from double.
      *
@@ -221,8 +265,9 @@ class ObjectProphecy implements ProphecyInterface
      */
     public function __get($name)
     {
-        return $this->reveal()->{$name};
+        return $this->reveal()->$name;
     }
+
     /**
      * Tries to set property value to double.
      *
@@ -231,6 +276,6 @@ class ObjectProphecy implements ProphecyInterface
      */
     public function __set($name, $value)
     {
-        $this->reveal()->{$name} = $this->revealer->reveal($value);
+        $this->reveal()->$name = $this->revealer->reveal($value);
     }
 }

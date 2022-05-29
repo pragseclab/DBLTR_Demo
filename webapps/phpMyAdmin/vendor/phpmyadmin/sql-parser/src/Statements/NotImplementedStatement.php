@@ -3,17 +3,22 @@
 /**
  * Not implemented (yet) statements.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Statements;
 
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Statement;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
+
 /**
  * Not implemented (yet) statements.
  *
  * The `after` function makes the parser jump straight to the first delimiter.
+ *
+ * @category   Statements
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class NotImplementedStatement extends Statement
 {
@@ -23,6 +28,7 @@ class NotImplementedStatement extends Statement
      * @var Token[]
      */
     public $unknown = array();
+
     /**
      * @return string
      */
@@ -30,12 +36,15 @@ class NotImplementedStatement extends Statement
     {
         // Building the parsed part of the query (if any).
         $query = parent::build() . ' ';
+
         // Rebuilding the unknown part from tokens.
         foreach ($this->unknown as $token) {
             $query .= $token->token;
         }
+
         return $query;
     }
+
     /**
      * @param Parser     $parser the instance that requests parsing
      * @param TokensList $list   the list of tokens to be parsed

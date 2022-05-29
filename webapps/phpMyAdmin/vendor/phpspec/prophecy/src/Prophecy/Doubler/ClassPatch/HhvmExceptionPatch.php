@@ -8,9 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Doubler\ClassPatch;
 
 use Prophecy\Doubler\Generator\Node\ClassNode;
+
 /**
  * Exception patch for HHVM to remove the stubs from special methods
  *
@@ -30,8 +32,10 @@ class HhvmExceptionPatch implements ClassPatchInterface
         if (!defined('HHVM_VERSION')) {
             return false;
         }
+
         return 'Exception' === $node->getParentClass() || is_subclass_of($node->getParentClass(), 'Exception');
     }
+
     /**
      * Removes special exception static methods from the doubled methods.
      *
@@ -48,6 +52,7 @@ class HhvmExceptionPatch implements ClassPatchInterface
             $node->getMethod('getTraceOptions')->useParentCode();
         }
     }
+
     /**
      * {@inheritdoc}
      */

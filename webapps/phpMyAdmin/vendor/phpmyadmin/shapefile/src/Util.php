@@ -1,5 +1,4 @@
 <?php
-
 /**
  * phpMyAdmin ShapeFile library
  * <https://github.com/phpmyadmin/shapefile/>.
@@ -20,12 +19,30 @@
  * along with this program; if not, you can download one from
  * https://www.gnu.org/copyleft/gpl.html.
  */
+
 namespace PhpMyAdmin\ShapeFile;
 
 class Util
 {
     private static $little_endian = null;
-    private static $shape_names = array(0 => 'Null Shape', 1 => 'Point', 3 => 'PolyLine', 5 => 'Polygon', 8 => 'MultiPoint', 11 => 'PointZ', 13 => 'PolyLineZ', 15 => 'PolygonZ', 18 => 'MultiPointZ', 21 => 'PointM', 23 => 'PolyLineM', 25 => 'PolygonM', 28 => 'MultiPointM', 31 => 'MultiPatch');
+
+    private static $shape_names = array(
+        0 => 'Null Shape',
+        1 => 'Point',
+        3 => 'PolyLine',
+        5 => 'Polygon',
+        8 => 'MultiPoint',
+        11 => 'PointZ',
+        13 => 'PolyLineZ',
+        15 => 'PolygonZ',
+        18 => 'MultiPointZ',
+        21 => 'PointM',
+        23 => 'PolyLineM',
+        25 => 'PolygonM',
+        28 => 'MultiPointM',
+        31 => 'MultiPatch',
+    );
+
     /**
      * Reads data.
      *
@@ -40,8 +57,10 @@ class Util
             return false;
         }
         $tmp = unpack($type, $data);
+
         return current($tmp);
     }
+
     /**
      * Changes endianity.
      *
@@ -55,8 +74,10 @@ class Util
         for ($i = strlen($binValue) - 2; $i >= 0; --$i) {
             $result .= $binValue[$i];
         }
+
         return $result;
     }
+
     /**
      * Encodes double value to correct endianity.
      *
@@ -67,14 +88,18 @@ class Util
     public static function packDouble($value)
     {
         $bin = pack('d', (float) $value);
+
         if (is_null(self::$little_endian)) {
-            self::$little_endian = pack('L', 1) == pack('V', 1);
+            self::$little_endian = (pack('L', 1) == pack('V', 1));
         }
+
         if (self::$little_endian) {
             return $bin;
+        } else {
+            return self::swap($bin);
         }
-        return self::swap($bin);
     }
+
     /**
      * Returns shape name.
      *
@@ -87,6 +112,7 @@ class Util
         if (isset(self::$shape_names[$type])) {
             return self::$shape_names[$type];
         }
+
         return sprintf('Shape %d', $type);
     }
 }

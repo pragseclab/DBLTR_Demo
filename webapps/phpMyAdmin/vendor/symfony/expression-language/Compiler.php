@@ -10,13 +10,12 @@
  */
 namespace Symfony\Component\ExpressionLanguage;
 
-use Symfony\Contracts\Service\ResetInterface;
 /**
  * Compiles a node to PHP code.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class Compiler implements ResetInterface
+class Compiler
 {
     private $source;
     private $functions;
@@ -44,6 +43,8 @@ class Compiler implements ResetInterface
     }
     /**
      * Compiles a node.
+     *
+     * @param Node\Node $node The node to compile
      *
      * @return $this
      */
@@ -82,7 +83,7 @@ class Compiler implements ResetInterface
      */
     public function string($value)
     {
-        $this->source .= sprintf('"%s"', addcslashes($value, "\x00\t\"\$\\"));
+        $this->source .= sprintf('"%s"', addcslashes($value, "\0\t\"\$\\"));
         return $this;
     }
     /**
@@ -94,20 +95,20 @@ class Compiler implements ResetInterface
      */
     public function repr($value)
     {
-        if (\is_int($value) || \is_float($value)) {
-            if (false !== ($locale = setlocale(\LC_NUMERIC, 0))) {
-                setlocale(\LC_NUMERIC, 'C');
+        if (is_int($value) || is_float($value)) {
+            if (false !== ($locale = setlocale(LC_NUMERIC, 0))) {
+                setlocale(LC_NUMERIC, 'C');
             }
             $this->raw($value);
             if (false !== $locale) {
-                setlocale(\LC_NUMERIC, $locale);
+                setlocale(LC_NUMERIC, $locale);
             }
         } elseif (null === $value) {
             $this->raw('null');
-        } elseif (\is_bool($value)) {
+        } elseif (is_bool($value)) {
             $this->raw($value ? 'true' : 'false');
-        } elseif (\is_array($value)) {
-            $this->raw('[');
+        } elseif (is_array($value)) {
+            $this->raw('array(');
             $first = true;
             foreach ($value as $key => $value) {
                 if (!$first) {
@@ -118,7 +119,7 @@ class Compiler implements ResetInterface
                 $this->raw(' => ');
                 $this->repr($value);
             }
-            $this->raw(']');
+            $this->raw(')');
         } else {
             $this->string($value);
         }

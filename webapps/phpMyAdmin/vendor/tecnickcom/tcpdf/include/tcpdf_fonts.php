@@ -69,7 +69,7 @@ class TCPDF_FONTS
      */
     public static function addTTFfont($fontfile, $fonttype = '', $enc = '', $flags = 32, $outpath = '', $platid = 3, $encid = 1, $addcbbox = false, $link = false)
     {
-        if (!TCPDF_STATIC::file_exists($fontfile)) {
+        if (!file_exists($fontfile)) {
             // Could not find file
             return false;
         }
@@ -94,7 +94,7 @@ class TCPDF_FONTS
             $outpath = self::_getfontpath();
         }
         // check if this font already exist
-        if (@TCPDF_STATIC::file_exists($outpath . $font_name . '.php')) {
+        if (@file_exists($outpath . $font_name . '.php')) {
             // this font already exist (delete it from fonts folder to rebuild it)
             return $font_name;
         }
@@ -688,7 +688,7 @@ class TCPDF_FONTS
                                 $glyphIdArray[$k] = TCPDF_STATIC::_getUSHORT($font, $offset);
                                 $offset += 2;
                             }
-                            for ($k = 0; $k < $segCount - 1; ++$k) {
+                            for ($k = 0; $k < $segCount; ++$k) {
                                 for ($c = $startCount[$k]; $c <= $endCount[$k]; ++$c) {
                                     if ($idRangeOffset[$k] == 0) {
                                         $g = ($idDelta[$k] + $c) % 65536;
@@ -904,7 +904,7 @@ class TCPDF_FONTS
                 $pfile .= '$file=\'' . $fmetric['file'] . '\';' . "\n";
                 $pfile .= '$ctg=\'' . $fmetric['ctg'] . '\';' . "\n";
                 // create CIDToGIDMap
-                $cidtogidmap = str_pad('', 131072, "\x00");
+                $cidtogidmap = str_pad('', 131072, "\0");
                 // (256 * 256 * 2) = 131072
                 foreach ($ctg as $cid => $gid) {
                     $cidtogidmap = self::updateCIDtoGIDmap($cidtogidmap, $cid, $ctg[$cid]);
@@ -1366,13 +1366,13 @@ class TCPDF_FONTS
                 $table[$tag]['data'] = substr($font, $table[$tag]['offset'], $table[$tag]['length']);
                 if ($tag == 'head') {
                     // set the checkSumAdjustment to 0
-                    $table[$tag]['data'] = substr($table[$tag]['data'], 0, 8) . "\x00\x00\x00\x00" . substr($table[$tag]['data'], 12);
+                    $table[$tag]['data'] = substr($table[$tag]['data'], 0, 8) . "\0\0\0\0" . substr($table[$tag]['data'], 12);
                 }
                 $pad = 4 - $table[$tag]['length'] % 4;
                 if ($pad != 4) {
                     // the length of a table must be a multiple of four bytes
                     $table[$tag]['length'] += $pad;
-                    $table[$tag]['data'] .= str_repeat("\x00", $pad);
+                    $table[$tag]['data'] .= str_repeat("\0", $pad);
                 }
                 $table[$tag]['offset'] = $offset;
                 $offset += $table[$tag]['length'];
@@ -1389,7 +1389,7 @@ class TCPDF_FONTS
         if ($pad != 4) {
             // the length of a table must be a multiple of four bytes
             $table['loca']['length'] += $pad;
-            $table['loca']['data'] .= str_repeat("\x00", $pad);
+            $table['loca']['data'] .= str_repeat("\0", $pad);
         }
         $table['loca']['offset'] = $offset;
         $table['loca']['checkSum'] = self::_getTTFtableChecksum($table['loca']['data'], $table['loca']['length']);
@@ -1401,7 +1401,7 @@ class TCPDF_FONTS
         if ($pad != 4) {
             // the length of a table must be a multiple of four bytes
             $table['glyf']['length'] += $pad;
-            $table['glyf']['data'] .= str_repeat("\x00", $pad);
+            $table['glyf']['data'] .= str_repeat("\0", $pad);
         }
         $table['glyf']['offset'] = $offset;
         $table['glyf']['checkSum'] = self::_getTTFtableChecksum($table['glyf']['data'], $table['glyf']['length']);
@@ -1594,11 +1594,11 @@ class TCPDF_FONTS
     {
         $fontfile = '';
         // search files on various directories
-        if ($fontdir !== false and @TCPDF_STATIC::file_exists($fontdir . $file)) {
+        if ($fontdir !== false and @file_exists($fontdir . $file)) {
             $fontfile = $fontdir . $file;
-        } elseif (@TCPDF_STATIC::file_exists(self::_getfontpath() . $file)) {
+        } elseif (@file_exists(self::_getfontpath() . $file)) {
             $fontfile = self::_getfontpath() . $file;
-        } elseif (@TCPDF_STATIC::file_exists($file)) {
+        } elseif (@file_exists($file)) {
             $fontfile = $file;
         }
         return $fontfile;
@@ -1656,7 +1656,6 @@ class TCPDF_FONTS
      */
     public static function unichr($c, $unicode = true)
     {
-        $c = intval($c);
         if (!$unicode) {
             return chr($c);
         } elseif ($c <= 0x7f) {
@@ -1738,14 +1737,14 @@ class TCPDF_FONTS
         $outstr = '';
         // string to be returned
         if ($setbom) {
-            $outstr .= "\xfe\xff";
+            $outstr .= "þÿ";
             // Byte Order Mark (BOM)
         }
         foreach ($unicode as $char) {
             if ($char == 0x200b) {
                 // skip Unicode Character 'ZERO WIDTH SPACE' (DEC:8203, U+200B)
             } elseif ($char == 0xfffd) {
-                $outstr .= "\xff\xfd";
+                $outstr .= "ÿý";
                 // replacement character
             } elseif ($char < 0x10000) {
                 $outstr .= chr($char >> 0x8);
@@ -2002,7 +2001,7 @@ class TCPDF_FONTS
      * @author Nicola Asuni
      * @public static
      */
-    public static function UTF8StringToArray($str, $isunicode = true, &$currentfont = array())
+    public static function UTF8StringToArray($str, $isunicode = true, &$currentfont)
     {
         if ($isunicode) {
             // requires PCRE unicode support turned on
@@ -2012,11 +2011,7 @@ class TCPDF_FONTS
             $chars = str_split($str);
             $carr = array_map('ord', $chars);
         }
-        if (is_array($currentfont['subsetchars']) && is_array($carr)) {
-            $currentfont['subsetchars'] += array_fill_keys($carr, true);
-        } else {
-            $currentfont['subsetchars'] = array_merge($currentfont['subsetchars'], $carr);
-        }
+        $currentfont['subsetchars'] += array_fill_keys($carr, true);
         return $carr;
     }
     /**
@@ -2028,7 +2023,7 @@ class TCPDF_FONTS
      * @since 3.2.000 (2008-06-23)
      * @public static
      */
-    public static function UTF8ToLatin1($str, $isunicode = true, &$currentfont = array())
+    public static function UTF8ToLatin1($str, $isunicode = true, &$currentfont)
     {
         $unicode = self::UTF8StringToArray($str, $isunicode, $currentfont);
         // array containing UTF-8 unicode values
@@ -2045,7 +2040,7 @@ class TCPDF_FONTS
      * @since 1.53.0.TC005 (2005-01-05)
      * @public static
      */
-    public static function UTF8ToUTF16BE($str, $setbom = false, $isunicode = true, &$currentfont = array())
+    public static function UTF8ToUTF16BE($str, $setbom = false, $isunicode = true, &$currentfont)
     {
         if (!$isunicode) {
             return $str;
@@ -2067,7 +2062,7 @@ class TCPDF_FONTS
      * @since 2.1.000 (2008-01-08)
      * @public static
      */
-    public static function utf8StrRev($str, $setbom = false, $forcertl = false, $isunicode = true, &$currentfont = array())
+    public static function utf8StrRev($str, $setbom = false, $forcertl = false, $isunicode = true, &$currentfont)
     {
         return self::utf8StrArrRev(self::UTF8StringToArray($str, $isunicode, $currentfont), $str, $setbom, $forcertl, $isunicode, $currentfont);
     }
@@ -2084,7 +2079,7 @@ class TCPDF_FONTS
      * @since 4.9.000 (2010-03-27)
      * @public static
      */
-    public static function utf8StrArrRev($arr, $str = '', $setbom = false, $forcertl = false, $isunicode = true, &$currentfont = array())
+    public static function utf8StrArrRev($arr, $str = '', $setbom = false, $forcertl = false, $isunicode = true, &$currentfont)
     {
         return self::arrUTF8ToUTF16BE(self::utf8Bidi($arr, $str, $forcertl, $isunicode, $currentfont), $setbom);
     }
@@ -2100,7 +2095,7 @@ class TCPDF_FONTS
      * @since 2.4.000 (2008-03-06)
      * @public static
      */
-    public static function utf8Bidi($ta, $str = '', $forcertl = false, $isunicode = true, &$currentfont = array())
+    public static function utf8Bidi($ta, $str = '', $forcertl = false, $isunicode = true, &$currentfont)
     {
         // paragraph embedding level
         $pel = 0;

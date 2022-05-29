@@ -6,19 +6,15 @@
  *
  * A statement represents the result of parsing the lexemes.
  */
-declare (strict_types=1);
 namespace PhpMyAdmin\SqlParser;
 
-use PhpMyAdmin\SqlParser\Components\FunctionCall;
 use PhpMyAdmin\SqlParser\Components\OptionsArray;
-use function array_flip;
-use function array_keys;
-use function count;
-use function in_array;
-use function stripos;
-use function trim;
 /**
  * Abstract statement definition.
+ *
+ * @category Statements
+ *
+ * @license  https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 abstract class Statement
 {
@@ -41,7 +37,7 @@ abstract class Statement
      *
      * @var array
      */
-    public static $OPTIONS = [];
+    public static $OPTIONS = array();
     /**
      * The clauses of this statement, in order.
      *
@@ -54,15 +50,13 @@ abstract class Statement
      *
      * @var array
      */
-    public static $CLAUSES = [];
-    /** @var array */
-    public static $END_OPTIONS = [];
+    public static $CLAUSES = array();
     /**
      * The options of this query.
      *
-     * @see static::$OPTIONS
-     *
      * @var OptionsArray
+     *
+     * @see static::$OPTIONS
      */
     public $options;
     /**
@@ -78,10 +72,12 @@ abstract class Statement
      */
     public $last;
     /**
+     * Constructor.
+     *
      * @param Parser     $parser the instance that requests parsing
      * @param TokensList $list   the list of tokens to be parsed
      */
-    public function __construct(?Parser $parser = null, ?TokensList $list = null)
+    public function __construct(Parser $parser = null, TokensList $list = null)
     {
         if ($parser !== null && $list !== null) {
             $this->parse($parser, $list);
@@ -94,88 +90,15 @@ abstract class Statement
      */
     public function build()
     {
-        /**
-         * Query to be returned.
-         *
-         * @var string
-         */
-        $query = '';
-        /**
-         * Clauses which were built already.
-         *
-         * It is required to keep track of built clauses because some fields,
-         * for example `join` is used by multiple clauses (`JOIN`, `LEFT JOIN`,
-         * `LEFT OUTER JOIN`, etc.). The same happens for `VALUE` and `VALUES`.
-         *
-         * A clause is considered built just after fields' value
-         * (`$this->field`) was used in building.
-         *
-         * @var array
-         */
-        $built = [];
-        /**
-         * Statement's clauses.
-         *
-         * @var array
-         */
-        $clauses = $this->getClauses();
-        foreach ($clauses as $clause) {
-            /**
-             * The name of the clause.
-             *
-             * @var string
-             */
-            $name = $clause[0];
-            /**
-             * The type of the clause.
-             *
-             * @see self::$CLAUSES
-             *
-             * @var int
-             */
-            $type = $clause[1];
-            /**
-             * The builder (parser) of this clause.
-             *
-             * @var Component
-             */
-            $class = Parser::$KEYWORD_PARSERS[$name]['class'];
-            /**
-             * The name of the field that is used as source for the builder.
-             * Same field is used to store the result of parsing.
-             *
-             * @var string
-             */
-            $field = Parser::$KEYWORD_PARSERS[$name]['field'];
-            // The field is empty, there is nothing to be built.
-            if (empty($this->{$field})) {
-                continue;
-            }
-            // Checking if this field was already built.
-            if ($type & 1) {
-                if (!empty($built[$field])) {
-                    continue;
-                }
-                $built[$field] = true;
-            }
-            // Checking if the name of the clause should be added.
-            if ($type & 2) {
-                $query = trim($query) . ' ' . $name;
-            }
-            // Checking if the result of the builder should be added.
-            if ($type & 1) {
-                $query = trim($query) . ' ' . $class::build($this->{$field});
-            }
-        }
-        return $query;
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("build") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Statement.php at line 106")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called build:106@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Statement.php');
+        die();
     }
     /**
      * Parses the statements defined by the tokens list.
      *
      * @param Parser     $parser the instance that requests parsing
      * @param TokensList $list   the list of tokens to be parsed
-     *
-     * @throws Exceptions\ParserException
      */
     public function parse(Parser $parser, TokensList $list)
     {
@@ -185,7 +108,7 @@ abstract class Statement
          *
          * @var array
          */
-        $parsedClauses = [];
+        $parsedClauses = array();
         // This may be corrected by the parser.
         $this->first = $list->idx;
         /**
@@ -216,21 +139,21 @@ abstract class Statement
             // Only keywords are relevant here. Other parts of the query are
             // processed in the functions below.
             if ($token->type !== Token::TYPE_KEYWORD) {
-                if ($token->type !== Token::TYPE_COMMENT && $token->type !== Token::TYPE_WHITESPACE) {
+                if ($token->type !== TOKEN::TYPE_COMMENT && $token->type !== Token::TYPE_WHITESPACE) {
                     $parser->error('Unexpected token.', $token);
                 }
                 continue;
             }
             // Unions are parsed by the parser because they represent more than
             // one statement.
-            if ($token->keyword === 'UNION' || $token->keyword === 'UNION ALL' || $token->keyword === 'UNION DISTINCT' || $token->keyword === 'EXCEPT' || $token->keyword === 'INTERSECT') {
+            if ($token->value === 'UNION' || $token->value === 'UNION ALL' || $token->value === 'UNION DISTINCT') {
                 break;
             }
             $lastIdx = $list->idx;
             // ON DUPLICATE KEY UPDATE ...
             // has to be parsed in parent statement (INSERT or REPLACE)
             // so look for it and break
-            if ($this instanceof Statements\SelectStatement && $token->value === 'ON') {
+            if ($this instanceof \PhpMyAdmin\SqlParser\Statements\SelectStatement && $token->value === 'ON') {
                 ++$list->idx;
                 // Skip ON
                 // look for ON DUPLICATE KEY UPDATE
@@ -260,7 +183,7 @@ abstract class Statement
              *
              * @var array
              */
-            $options = [];
+            $options = array();
             // Looking for duplicated clauses.
             if (!empty(Parser::$KEYWORD_PARSERS[$token->value]) || !empty(Parser::$STATEMENT_PARSERS[$token->value])) {
                 if (!empty($parsedClauses[$token->value])) {
@@ -270,19 +193,15 @@ abstract class Statement
                 $parsedClauses[$token->value] = true;
             }
             // Checking if this is the beginning of a clause.
-            // Fix Issue #221: As `truncate` is not a keyword
-            // but it might be the beginning of a statement of truncate,
-            // so let the value use the keyword field for truncate type.
-            $token_value = in_array($token->keyword, ['TRUNCATE']) ? $token->keyword : $token->value;
-            if (!empty(Parser::$KEYWORD_PARSERS[$token_value]) && $list->idx < $list->count) {
-                $class = Parser::$KEYWORD_PARSERS[$token_value]['class'];
-                $field = Parser::$KEYWORD_PARSERS[$token_value]['field'];
-                if (!empty(Parser::$KEYWORD_PARSERS[$token_value]['options'])) {
-                    $options = Parser::$KEYWORD_PARSERS[$token_value]['options'];
+            if (!empty(Parser::$KEYWORD_PARSERS[$token->value])) {
+                $class = Parser::$KEYWORD_PARSERS[$token->value]['class'];
+                $field = Parser::$KEYWORD_PARSERS[$token->value]['field'];
+                if (!empty(Parser::$KEYWORD_PARSERS[$token->value]['options'])) {
+                    $options = Parser::$KEYWORD_PARSERS[$token->value]['options'];
                 }
             }
             // Checking if this is the beginning of the statement.
-            if (!empty(Parser::$STATEMENT_PARSERS[$token->keyword])) {
+            if (!empty(Parser::$STATEMENT_PARSERS[$token->value])) {
                 if (!empty(static::$CLAUSES) && empty(static::$CLAUSES[$token->value])) {
                     // Some keywords (e.g. `SET`) may be the beginning of a
                     // statement and a clause.
@@ -301,13 +220,9 @@ abstract class Statement
                     $parsedOptions = true;
                 }
             } elseif ($class === null) {
-                if ($this instanceof Statements\SelectStatement && ($token->value === 'FOR UPDATE' || $token->value === 'LOCK IN SHARE MODE')) {
-                    // Handle special end options in Select statement
-                    // See Statements\SelectStatement::$END_OPTIONS
-                    $this->end_options = OptionsArray::parse($parser, $list, static::$END_OPTIONS);
-                } elseif ($this instanceof Statements\SetStatement && ($token->value === 'COLLATE' || $token->value === 'DEFAULT')) {
-                    // Handle special end options in SET statement
-                    // See Statements\SetStatement::$END_OPTIONS
+                // Handle special end options in Select statement
+                // See Statements\SelectStatement::$END_OPTIONS
+                if ($this instanceof \PhpMyAdmin\SqlParser\Statements\SelectStatement && ($token->value === 'FOR UPDATE' || $token->value === 'LOCK IN SHARE MODE')) {
                     $this->end_options = OptionsArray::parse($parser, $list, static::$END_OPTIONS);
                 } else {
                     // There is no parser for this keyword and isn't the beginning
@@ -319,20 +234,11 @@ abstract class Statement
             $this->before($parser, $list, $token);
             // Parsing this keyword.
             if ($class !== null) {
-                // We can't parse keyword at the end of statement
-                if ($list->idx >= $list->count) {
-                    $parser->error('Keyword at end of statement.', $token);
-                    continue;
-                }
                 ++$list->idx;
                 // Skipping keyword or last option.
                 $this->{$field} = $class::parse($parser, $list, $options);
             }
             $this->after($parser, $list, $token);
-            // #223 Here may make a patch, if last is delimiter, back one
-            if ($class === FunctionCall::class && $list->offsetGet($list->idx)->type === Token::TYPE_DELIMITER) {
-                --$list->idx;
-            }
         }
         // This may be corrected by the parser.
         $this->last = --$list->idx;
@@ -376,8 +282,8 @@ abstract class Statement
      */
     public function __toString()
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("__toString") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Statement.php at line 379")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called __toString:379@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Statement.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("__toString") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Statement.php at line 427")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called __toString:427@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Statement.php');
         die();
     }
     /**
@@ -389,20 +295,18 @@ abstract class Statement
      * @param TokensList $list   the list of tokens to be parsed
      *
      * @return bool
-     *
-     * @throws Exceptions\ParserException
      */
     public function validateClauseOrder($parser, $list)
     {
         $clauses = array_flip(array_keys($this->getClauses()));
-        if (empty($clauses) || count($clauses) === 0) {
+        if (empty($clauses) || count($clauses) == 0) {
             return true;
         }
         $minIdx = -1;
         /**
          * For tracking JOIN clauses in a query
          *   = 0 - JOIN not found till now
-         *   > 0 - Index of first JOIN clause in the statement.
+         *   > 0 - Index of first JOIN clause in the statement
          *
          * @var int
          */
@@ -412,7 +316,7 @@ abstract class Statement
          *   = 0 - JOIN not found till now
          *   > 0 - Index of last JOIN clause
          *         (which appears together with other JOINs)
-         *         in the statement.
+         *         in the statement
          *
          * @var int
          */
@@ -421,13 +325,8 @@ abstract class Statement
         $lastIdx = 0;
         foreach ($clauses as $clauseType => $index) {
             $clauseStartIdx = Utils\Query::getClauseStartOffset($this, $list, $clauseType);
-            if ($clauseStartIdx !== -1 && $this instanceof Statements\SelectStatement && ($clauseType === 'FORCE' || $clauseType === 'IGNORE' || $clauseType === 'USE')) {
-                // TODO: ordering of clauses in a SELECT statement with
-                // Index hints is not supported
-                return true;
-            }
             // Handle ordering of Multiple Joins in a query
-            if ($clauseStartIdx !== -1) {
+            if ($clauseStartIdx != -1) {
                 if ($minJoin === 0 && stripos($clauseType, 'JOIN')) {
                     // First JOIN clause is detected
                     $minJoin = $maxJoin = $clauseStartIdx;
@@ -438,14 +337,14 @@ abstract class Statement
                     $error = 1;
                 }
             }
-            if ($clauseStartIdx !== -1 && $clauseStartIdx < $minIdx) {
+            if ($clauseStartIdx != -1 && $clauseStartIdx < $minIdx) {
                 if ($minJoin === 0 || $error === 1) {
                     $token = $list->tokens[$clauseStartIdx];
                     $parser->error('Unexpected ordering of clauses.', $token);
                     return false;
                 }
                 $minIdx = $clauseStartIdx;
-            } elseif ($clauseStartIdx !== -1) {
+            } elseif ($clauseStartIdx != -1) {
                 $minIdx = $clauseStartIdx;
             }
             $lastIdx = $clauseStartIdx !== -1 ? $clauseStartIdx : $lastIdx;

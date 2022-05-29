@@ -6,23 +6,14 @@
  * A context is a collection of keywords, operators and functions used for
  * parsing.
  */
-declare (strict_types=1);
 namespace PhpMyAdmin\SqlParser;
 
-use PhpMyAdmin\SqlParser\Exceptions\LoaderException;
-use function class_exists;
-use function constant;
-use function explode;
-use function intval;
-use function is_array;
-use function is_numeric;
-use function str_replace;
-use function strlen;
-use function strncmp;
-use function strtoupper;
-use function substr;
 /**
  * Holds the configuration of the context that is currently used.
+ *
+ * @category Contexts
+ *
+ * @license  https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 abstract class Context
 {
@@ -30,21 +21,27 @@ abstract class Context
      * The maximum length of a keyword.
      *
      * @see static::$TOKEN_KEYWORD
+     *
+     * @var int
      */
-    public const KEYWORD_MAX_LENGTH = 30;
+    const KEYWORD_MAX_LENGTH = 30;
     /**
      * The maximum length of a label.
      *
      * @see static::$TOKEN_LABEL
      * Ref: https://dev.mysql.com/doc/refman/5.7/en/statement-labels.html
+     *
+     * @var int
      */
-    public const LABEL_MAX_LENGTH = 16;
+    const LABEL_MAX_LENGTH = 16;
     /**
      * The maximum length of an operator.
      *
      * @see static::$TOKEN_OPERATOR
+     *
+     * @var int
      */
-    public const OPERATOR_MAX_LENGTH = 4;
+    const OPERATOR_MAX_LENGTH = 4;
     /**
      * The name of the default content.
      *
@@ -72,21 +69,19 @@ abstract class Context
      *
      * The value associated to each keyword represents its flags.
      *
-     * @see Token::FLAG_KEYWORD_RESERVED Token::FLAG_KEYWORD_COMPOSED
-     *      Token::FLAG_KEYWORD_DATA_TYPE Token::FLAG_KEYWORD_KEY
-     *      Token::FLAG_KEYWORD_FUNCTION
+     * @see Token::FLAG_KEYWORD_*
      *
      * Elements are sorted by flags, length and keyword.
      *
      * @var array
      */
-    public static $KEYWORDS = [];
+    public static $KEYWORDS = array();
     /**
      * List of operators and their flags.
      *
      * @var array
      */
-    public static $OPERATORS = [
+    public static $OPERATORS = array(
         // Some operators (*, =) may have ambiguous flags, because they depend on
         // the context they are being used in.
         // For example: 1. SELECT * FROM table; # SQL specific (wildcard)
@@ -126,7 +121,7 @@ abstract class Context
         '.' => 16,
         ',' => 16,
         ';' => 16,
-    ];
+    );
     /**
      * The mode of the MySQL server that will be used in lexing, parsing and
      * building the statements.
@@ -140,78 +135,78 @@ abstract class Context
      */
     // Compatibility mode for Microsoft's SQL server.
     // This is the equivalent of ANSI_QUOTES.
-    public const SQL_MODE_COMPAT_MYSQL = 2;
+    const COMPAT_MYSQL = 2;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_allow_invalid_dates
-    public const SQL_MODE_ALLOW_INVALID_DATES = 1;
+    const ALLOW_INVALID_DATES = 1;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_ansi_quotes
-    public const SQL_MODE_ANSI_QUOTES = 2;
+    const ANSI_QUOTES = 2;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_error_for_division_by_zero
-    public const SQL_MODE_ERROR_FOR_DIVISION_BY_ZERO = 4;
+    const ERROR_FOR_DIVISION_BY_ZERO = 4;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_high_not_precedence
-    public const SQL_MODE_HIGH_NOT_PRECEDENCE = 8;
+    const HIGH_NOT_PRECEDENCE = 8;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_ignore_space
-    public const SQL_MODE_IGNORE_SPACE = 16;
+    const IGNORE_SPACE = 16;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_no_auto_create_user
-    public const SQL_MODE_NO_AUTO_CREATE_USER = 32;
+    const NO_AUTO_CREATE_USER = 32;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_no_auto_value_on_zero
-    public const SQL_MODE_NO_AUTO_VALUE_ON_ZERO = 64;
+    const NO_AUTO_VALUE_ON_ZERO = 64;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_no_backslash_escapes
-    public const SQL_MODE_NO_BACKSLASH_ESCAPES = 128;
+    const NO_BACKSLASH_ESCAPES = 128;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_no_dir_in_create
-    public const SQL_MODE_NO_DIR_IN_CREATE = 256;
+    const NO_DIR_IN_CREATE = 256;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_no_dir_in_create
-    public const SQL_MODE_NO_ENGINE_SUBSTITUTION = 512;
+    const NO_ENGINE_SUBSTITUTION = 512;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_no_field_options
-    public const SQL_MODE_NO_FIELD_OPTIONS = 1024;
+    const NO_FIELD_OPTIONS = 1024;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_no_key_options
-    public const SQL_MODE_NO_KEY_OPTIONS = 2048;
+    const NO_KEY_OPTIONS = 2048;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_no_table_options
-    public const SQL_MODE_NO_TABLE_OPTIONS = 4096;
+    const NO_TABLE_OPTIONS = 4096;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_no_unsigned_subtraction
-    public const SQL_MODE_NO_UNSIGNED_SUBTRACTION = 8192;
+    const NO_UNSIGNED_SUBTRACTION = 8192;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_no_zero_date
-    public const SQL_MODE_NO_ZERO_DATE = 16384;
+    const NO_ZERO_DATE = 16384;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_no_zero_in_date
-    public const SQL_MODE_NO_ZERO_IN_DATE = 32768;
+    const NO_ZERO_IN_DATE = 32768;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_only_full_group_by
-    public const SQL_MODE_ONLY_FULL_GROUP_BY = 65536;
+    const ONLY_FULL_GROUP_BY = 65536;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_pipes_as_concat
-    public const SQL_MODE_PIPES_AS_CONCAT = 131072;
+    const PIPES_AS_CONCAT = 131072;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_real_as_float
-    public const SQL_MODE_REAL_AS_FLOAT = 262144;
+    const REAL_AS_FLOAT = 262144;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_strict_all_tables
-    public const SQL_MODE_STRICT_ALL_TABLES = 524288;
+    const STRICT_ALL_TABLES = 524288;
     // https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sqlmode_strict_trans_tables
-    public const SQL_MODE_STRICT_TRANS_TABLES = 1048576;
+    const STRICT_TRANS_TABLES = 1048576;
     // Custom modes.
     // The table and column names and any other field that must be escaped will
     // not be.
     // Reserved keywords are being escaped regardless this mode is used or not.
-    public const SQL_MODE_NO_ENCLOSING_QUOTES = 1073741824;
+    const NO_ENCLOSING_QUOTES = 1073741824;
     /*
      * Combination SQL Modes
      * https://dev.mysql.com/doc/refman/5.0/en/sql-mode.html#sql-mode-combo
      */
     // REAL_AS_FLOAT, PIPES_AS_CONCAT, ANSI_QUOTES, IGNORE_SPACE
-    public const SQL_MODE_ANSI = 393234;
+    const SQL_MODE_ANSI = 393234;
     // PIPES_AS_CONCAT, ANSI_QUOTES, IGNORE_SPACE, NO_KEY_OPTIONS,
     // NO_TABLE_OPTIONS, NO_FIELD_OPTIONS,
-    public const SQL_MODE_DB2 = 138258;
+    const SQL_MODE_DB2 = 138258;
     // PIPES_AS_CONCAT, ANSI_QUOTES, IGNORE_SPACE, NO_KEY_OPTIONS,
     // NO_TABLE_OPTIONS, NO_FIELD_OPTIONS, NO_AUTO_CREATE_USER
-    public const SQL_MODE_MAXDB = 138290;
+    const SQL_MODE_MAXDB = 138290;
     // PIPES_AS_CONCAT, ANSI_QUOTES, IGNORE_SPACE, NO_KEY_OPTIONS,
     // NO_TABLE_OPTIONS, NO_FIELD_OPTIONS
-    public const SQL_MODE_MSSQL = 138258;
+    const SQL_MODE_MSSQL = 138258;
     // PIPES_AS_CONCAT, ANSI_QUOTES, IGNORE_SPACE, NO_KEY_OPTIONS,
     // NO_TABLE_OPTIONS, NO_FIELD_OPTIONS, NO_AUTO_CREATE_USER
-    public const SQL_MODE_ORACLE = 138290;
+    const SQL_MODE_ORACLE = 138290;
     // PIPES_AS_CONCAT, ANSI_QUOTES, IGNORE_SPACE, NO_KEY_OPTIONS,
     // NO_TABLE_OPTIONS, NO_FIELD_OPTIONS
-    public const SQL_MODE_POSTGRESQL = 138258;
+    const SQL_MODE_POSTGRESQL = 138258;
     // STRICT_TRANS_TABLES, STRICT_ALL_TABLES, NO_ZERO_IN_DATE, NO_ZERO_DATE,
     // ERROR_FOR_DIVISION_BY_ZERO, NO_AUTO_CREATE_USER
-    public const SQL_MODE_TRADITIONAL = 1622052;
+    const SQL_MODE_TRADITIONAL = 1622052;
     // -------------------------------------------------------------------------
     // Keyword.
     /**
@@ -220,18 +215,13 @@ abstract class Context
      * @param string $str        string to be checked
      * @param bool   $isReserved checks if the keyword is reserved
      *
-     * @return int|null
+     * @return int
      */
     public static function isKeyword($str, $isReserved = false)
     {
-        $str = strtoupper($str);
-        if (isset(static::$KEYWORDS[$str])) {
-            if ($isReserved && !(static::$KEYWORDS[$str] & Token::FLAG_KEYWORD_RESERVED)) {
-                return null;
-            }
-            return static::$KEYWORDS[$str];
-        }
-        return null;
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("isKeyword") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 251")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called isKeyword:251@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
+        die();
     }
     // -------------------------------------------------------------------------
     // Operator.
@@ -240,14 +230,13 @@ abstract class Context
      *
      * @param string $str string to be checked
      *
-     * @return int|null the appropriate flag for the operator
+     * @return int the appropriate flag for the operator
      */
     public static function isOperator($str)
     {
-        if (!isset(static::$OPERATORS[$str])) {
-            return null;
-        }
-        return static::$OPERATORS[$str];
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("isOperator") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 278")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called isOperator:278@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
+        die();
     }
     // -------------------------------------------------------------------------
     // Whitespace.
@@ -260,7 +249,9 @@ abstract class Context
      */
     public static function isWhitespace($str)
     {
-        return $str === ' ' || $str === "\r" || $str === "\n" || $str === "\t";
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("isWhitespace") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 297")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called isWhitespace:297@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
+        die();
     }
     // -------------------------------------------------------------------------
     // Comment.
@@ -268,37 +259,14 @@ abstract class Context
      * Checks if the given string is the beginning of a whitespace.
      *
      * @param string $str string to be checked
-     * @param mixed  $end
      *
-     * @return int|null the appropriate flag for the comment type
+     * @return int the appropriate flag for the comment type
      */
-    public static function isComment($str, $end = false)
+    public static function isComment($str)
     {
-        $len = strlen($str);
-        if ($len === 0) {
-            return null;
-        }
-        // If comment is Bash style (#):
-        if ($str[0] === '#') {
-            return Token::FLAG_COMMENT_BASH;
-        }
-        // If comment is opening C style (/*), warning, it could be a MySQL command (/*!)
-        if ($len > 1 && $str[0] === '/' && $str[1] === '*') {
-            return $len > 2 && $str[2] === '!' ? Token::FLAG_COMMENT_MYSQL_CMD : Token::FLAG_COMMENT_C;
-        }
-        // If comment is closing C style (*/), warning, it could conflicts with wildcard and a real opening C style.
-        // It would looks like the following valid SQL statement: "SELECT */* comment */ FROM...".
-        if ($len > 1 && $str[0] === '*' && $str[1] === '/') {
-            return Token::FLAG_COMMENT_C;
-        }
-        // If comment is SQL style (--\s?):
-        if ($len > 2 && $str[0] === '-' && $str[1] === '-' && static::isWhitespace($str[2])) {
-            return Token::FLAG_COMMENT_SQL;
-        }
-        if ($len === 2 && $end && $str[0] === '-' && $str[1] === '-') {
-            return Token::FLAG_COMMENT_SQL;
-        }
-        return null;
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("isComment") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 312")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called isComment:312@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
+        die();
     }
     // -------------------------------------------------------------------------
     // Bool.
@@ -313,8 +281,9 @@ abstract class Context
      */
     public static function isBool($str)
     {
-        $str = strtoupper($str);
-        return $str === 'TRUE' || $str === 'FALSE';
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("isBool") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 343")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called isBool:343@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
+        die();
     }
     // -------------------------------------------------------------------------
     // Number.
@@ -327,8 +296,8 @@ abstract class Context
      */
     public static function isNumber($str)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("isNumber") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 330")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called isNumber:330@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("isNumber") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 360")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called isNumber:360@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
         die();
     }
     // -------------------------------------------------------------------------
@@ -339,21 +308,13 @@ abstract class Context
      *
      * @param string $str string to be checked
      *
-     * @return int|null the appropriate flag for the symbol type
+     * @return int the appropriate flag for the symbol type
      */
     public static function isSymbol($str)
     {
-        if (strlen($str) === 0) {
-            return null;
-        }
-        if ($str[0] === '@') {
-            return Token::FLAG_SYMBOL_VARIABLE;
-        } elseif ($str[0] === '`') {
-            return Token::FLAG_SYMBOL_BACKTICK;
-        } elseif ($str[0] === ':' || $str[0] === '?') {
-            return Token::FLAG_SYMBOL_PARAMETER;
-        }
-        return null;
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("isSymbol") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 377")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called isSymbol:377@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
+        die();
     }
     // -------------------------------------------------------------------------
     // String.
@@ -362,19 +323,13 @@ abstract class Context
      *
      * @param string $str string to be checked
      *
-     * @return int|null the appropriate flag for the string type
+     * @return int the appropriate flag for the string type
      */
     public static function isString($str)
     {
-        if (strlen($str) === 0) {
-            return null;
-        }
-        if ($str[0] === '\'') {
-            return Token::FLAG_STRING_SINGLE_QUOTES;
-        } elseif ($str[0] === '"') {
-            return Token::FLAG_STRING_DOUBLE_QUOTES;
-        }
-        return null;
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("isString") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 398")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called isString:398@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
+        die();
     }
     // -------------------------------------------------------------------------
     // Delimiter.
@@ -387,9 +342,9 @@ abstract class Context
      */
     public static function isSeparator($str)
     {
-        // NOTES:   Only non alphanumeric ASCII characters may be separators.
-        //          `~` is the last printable ASCII character.
-        return $str <= '~' && $str !== '_' && $str !== '$' && ($str < '0' || $str > '9') && ($str < 'a' || $str > 'z') && ($str < 'A' || $str > 'Z');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("isSeparator") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 421")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called isSeparator:421@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
+        die();
     }
     /**
      * Loads the specified context.
@@ -399,7 +354,7 @@ abstract class Context
      * @param string $context name of the context or full class name that
      *                        defines the context
      *
-     * @throws LoaderException if the specified context doesn't exist.
+     * @throws \Exception if the specified context doesn't exist
      */
     public static function load($context = '')
     {
@@ -411,7 +366,7 @@ abstract class Context
             $context = self::$contextPrefix . $context;
         }
         if (!class_exists($context)) {
-            throw @new LoaderException('Specified context ("' . $context . '") does not exist.', $context);
+            throw new \Exception('Specified context ("' . $context . '") does not exist.');
         }
         self::$loadedContext = $context;
         self::$KEYWORDS = $context::$KEYWORDS;
@@ -427,35 +382,32 @@ abstract class Context
      * @param string $context name of the context or full class name that
      *                        defines the context
      *
-     * @return string|null The loaded context. `null` if no context was loaded.
+     * @return string The loaded context. `null` if no context was loaded.
      */
     public static function loadClosest($context = '')
     {
-        $length = strlen($context);
-        for ($i = $length; $i > 0;) {
+        /**
+         * The number of replaces done by `preg_replace`.
+         * This actually represents whether a new context was generated or not.
+         *
+         * @var int
+         */
+        $count = 0;
+        // As long as a new context can be generated, we try to load it.
+        do {
             try {
-                /* Trying to load the new context */
+                // Trying to load the new context.
                 static::load($context);
-                return $context;
-            } catch (LoaderException $e) {
-                /* Replace last two non zero digits by zeroes */
-                do {
-                    $i -= 2;
-                    $part = substr($context, $i, 2);
-                    /* No more numeric parts to strip */
-                    if (!is_numeric($part)) {
-                        break 2;
-                    }
-                } while (intval($part) === 0 && $i > 0);
-                $context = substr($context, 0, $i) . '00' . substr($context, $i + 2);
+            } catch (\Exception $e) {
+                // If it didn't work, we are looking for a new one and skipping
+                // over to the next generation that will try the new context.
+                $context = preg_replace('/[1-9](0*)$/', '0$1', $context, -1, $count);
+                continue;
             }
-        }
-        /* Fallback to loading at least matching engine */
-        if (strncmp($context, 'MariaDb', 7) === 0) {
-            return static::loadClosest('MariaDb100300');
-        } elseif (strncmp($context, 'MySql', 5) === 0) {
-            return static::loadClosest('MySql50700');
-        }
+            // Last generated context was valid (did not throw any exceptions).
+            // So we return it, to let the user know what context was loaded.
+            return $context;
+        } while ($count !== 0);
         return null;
     }
     /**
@@ -465,8 +417,8 @@ abstract class Context
      */
     public static function setMode($mode = '')
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("setMode") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 466")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called setMode:466@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("setMode") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 511")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called setMode:511@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
         die();
     }
     /**
@@ -475,46 +427,12 @@ abstract class Context
      * @param array|string $str   the string to be escaped
      * @param string       $quote quote to be used when escaping
      *
-     * @return string|array
+     * @return string
      */
     public static function escape($str, $quote = '`')
     {
-        if (is_array($str)) {
-            foreach ($str as $key => $value) {
-                $str[$key] = static::escape($value);
-            }
-            return $str;
-        }
-        if (static::$MODE & self::SQL_MODE_NO_ENCLOSING_QUOTES && !static::isKeyword($str, true)) {
-            return $str;
-        }
-        if (static::$MODE & self::SQL_MODE_ANSI_QUOTES) {
-            $quote = '"';
-        }
-        return $quote . str_replace($quote, $quote . $quote, $str) . $quote;
-    }
-    /**
-     * Returns char used to quote identifiers based on currently set SQL Mode (ie. standard or ANSI_QUOTES)
-     *
-     * @return string either " (double quote, ansi_quotes mode) or ` (backtick, standard mode)
-     */
-    public static function getIdentifierQuote()
-    {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("getIdentifierQuote") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 506")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called getIdentifierQuote:506@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
-        die();
-    }
-    /**
-     * Function verifies that given SQL Mode constant is currently set
-     *
-     * @param int $flag for example Context::SQL_MODE_ANSI_QUOTES
-     *
-     * @return bool false on empty param, true/false on given constant/int value
-     */
-    public static function hasMode($flag = null)
-    {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("hasMode") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 517")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called hasMode:517@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("escape") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php at line 531")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called escape:531@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_1/vendor/phpmyadmin/sql-parser/src/Context.php');
         die();
     }
 }

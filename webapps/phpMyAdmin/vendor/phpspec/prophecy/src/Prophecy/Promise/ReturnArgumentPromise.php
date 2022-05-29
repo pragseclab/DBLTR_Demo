@@ -8,11 +8,13 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Promise;
 
 use Prophecy\Exception\InvalidArgumentException;
 use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophecy\MethodProphecy;
+
 /**
  * Return argument promise.
  *
@@ -24,6 +26,7 @@ class ReturnArgumentPromise implements PromiseInterface
      * @var int
      */
     private $index;
+
     /**
      * Initializes callback promise.
      *
@@ -34,10 +37,14 @@ class ReturnArgumentPromise implements PromiseInterface
     public function __construct($index = 0)
     {
         if (!is_int($index) || $index < 0) {
-            throw new InvalidArgumentException(sprintf('Zero-based index expected as argument to ReturnArgumentPromise, but got %s.', $index));
+            throw new InvalidArgumentException(sprintf(
+                'Zero-based index expected as argument to ReturnArgumentPromise, but got %s.',
+                $index
+            ));
         }
         $this->index = $index;
     }
+
     /**
      * Returns nth argument if has one, null otherwise.
      *

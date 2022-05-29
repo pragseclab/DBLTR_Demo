@@ -1,10 +1,10 @@
 <?php
-
 if ($neverHappens) {
     // @codeCoverageIgnoreStart
     print '*';
     // @codeCoverageIgnoreEnd
 }
+
 /**
  * @codeCoverageIgnore
  */
@@ -14,6 +14,7 @@ class Foo
     {
     }
 }
+
 class Bar
 {
     /**
@@ -23,12 +24,14 @@ class Bar
     {
     }
 }
+
 function baz()
 {
-    print '*';
-    // @codeCoverageIgnore
+    print '*'; // @codeCoverageIgnore
 }
+
 interface Bor
 {
     public function foo();
+
 }

@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Symfony\Component\Config\Definition\Builder;
 
 /**
@@ -20,10 +21,17 @@ class NormalizationBuilder
     protected $node;
     public $before = array();
     public $remappings = array();
+
+    /**
+     * Constructor.
+     *
+     * @param NodeDefinition $node The related node
+     */
     public function __construct(NodeDefinition $node)
     {
         $this->node = $node;
     }
+
     /**
      * Registers a key to remap to its plural form.
      *
@@ -34,11 +42,15 @@ class NormalizationBuilder
      */
     public function remap($key, $plural = null)
     {
-        $this->remappings[] = [$key, null === $plural ? $key . 's' : $plural];
+        $this->remappings[] = array($key, null === $plural ? $key.'s' : $plural);
+
         return $this;
     }
+
     /**
      * Registers a closure to run before the normalization or an expression builder to build it if null is provided.
+     *
+     * @param \Closure $closure
      *
      * @return ExprBuilder|$this
      */
@@ -46,8 +58,10 @@ class NormalizationBuilder
     {
         if (null !== $closure) {
             $this->before[] = $closure;
+
             return $this;
         }
+
         return $this->before[] = new ExprBuilder($this->node);
     }
 }

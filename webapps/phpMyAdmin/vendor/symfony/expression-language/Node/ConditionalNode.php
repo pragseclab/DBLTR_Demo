@@ -20,7 +20,7 @@ class ConditionalNode extends Node
 {
     public function __construct(Node $expr1, Node $expr2, Node $expr3)
     {
-        parent::__construct(['expr1' => $expr1, 'expr2' => $expr2, 'expr3' => $expr3]);
+        parent::__construct(array('expr1' => $expr1, 'expr2' => $expr2, 'expr3' => $expr3));
     }
     public function compile(Compiler $compiler)
     {
@@ -35,6 +35,6 @@ class ConditionalNode extends Node
     }
     public function toArray()
     {
-        return ['(', $this->nodes['expr1'], ' ? ', $this->nodes['expr2'], ' : ', $this->nodes['expr3'], ')'];
+        return array('(', $this->nodes['expr1'], ' ? ', $this->nodes['expr2'], ' : ', $this->nodes['expr3'], ')');
     }
 }

@@ -3,7 +3,7 @@
 /**
  * `REFERENCES` keyword parser.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
@@ -11,10 +11,13 @@ use PhpMyAdmin\SqlParser\Context;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function implode;
-use function trim;
+
 /**
  * `REFERENCES` keyword parser.
+ *
+ * @category   Keywords
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class Reference extends Component
 {
@@ -23,26 +26,36 @@ class Reference extends Component
      *
      * @var array
      */
-    public static $REFERENCES_OPTIONS = array('MATCH' => array(1, 'var'), 'ON DELETE' => array(2, 'var'), 'ON UPDATE' => array(3, 'var'));
+    public static $REFERENCES_OPTIONS = array(
+        'MATCH' => array(1, 'var'),
+        'ON DELETE' => array(2, 'var'),
+        'ON UPDATE' => array(3, 'var'),
+    );
+
     /**
      * The referenced table.
      *
      * @var Expression
      */
     public $table;
+
     /**
      * The referenced columns.
      *
      * @var array
      */
     public $columns;
+
     /**
      * The options of the referencing.
      *
      * @var OptionsArray
      */
     public $options;
+
     /**
+     * Constructor.
+     *
      * @param Expression   $table   the name of the table referenced
      * @param array        $columns the columns referenced
      * @param OptionsArray $options the options
@@ -53,6 +66,7 @@ class Reference extends Component
         $this->columns = $columns;
         $this->options = $options;
     }
+
     /**
      * @param Parser     $parser  the parser that serves as context
      * @param TokensList $list    the list of tokens that are being parsed
@@ -62,7 +76,8 @@ class Reference extends Component
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = new static();
+        $ret = new self();
+
         /**
          * The state of the parser.
          *
@@ -77,6 +92,7 @@ class Reference extends Component
          * @var int
          */
         $state = 0;
+
         for (; $list->idx < $list->count; ++$list->idx) {
             /**
              * Token parsed at this moment.
@@ -84,16 +100,26 @@ class Reference extends Component
              * @var Token
              */
             $token = $list->tokens[$list->idx];
+
             // End of statement.
             if ($token->type === Token::TYPE_DELIMITER) {
                 break;
             }
+
             // Skipping whitespaces and comments.
-            if ($token->type === Token::TYPE_WHITESPACE || $token->type === Token::TYPE_COMMENT) {
+            if (($token->type === Token::TYPE_WHITESPACE) || ($token->type === Token::TYPE_COMMENT)) {
                 continue;
             }
+
             if ($state === 0) {
-                $ret->table = Expression::parse($parser, $list, ['parseField' => 'table', 'breakOnAlias' => true]);
+                $ret->table = Expression::parse(
+                    $parser,
+                    $list,
+                    array(
+                        'parseField' => 'table',
+                        'breakOnAlias' => true,
+                    )
+                );
                 $state = 1;
             } elseif ($state === 1) {
                 $ret->columns = ArrayObj::parse($parser, $list)->values;
@@ -104,9 +130,12 @@ class Reference extends Component
                 break;
             }
         }
+
         --$list->idx;
+
         return $ret;
     }
+
     /**
      * @param Reference $component the component to be built
      * @param array     $options   parameters for building
@@ -115,6 +144,10 @@ class Reference extends Component
      */
     public static function build($component, array $options = array())
     {
-        return trim($component->table . ' (' . implode(', ', Context::escape($component->columns)) . ') ' . $component->options);
+        return trim(
+            $component->table
+            . ' (' . implode(', ', Context::escape($component->columns)) . ') '
+            . $component->options
+        );
     }
 }

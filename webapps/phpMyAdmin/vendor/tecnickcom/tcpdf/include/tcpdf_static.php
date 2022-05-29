@@ -2,9 +2,9 @@
 
 //============================================================+
 // File name   : tcpdf_static.php
-// Version     : 1.1.4
+// Version     : 1.1.3
 // Begin       : 2002-08-03
-// Last Update : 2019-11-01
+// Last Update : 2015-04-28
 // Author      : Nicola Asuni - Tecnick.com LTD - www.tecnick.com - info@tecnick.com
 // License     : GNU-LGPL v3 (http://www.gnu.org/copyleft/lesser.html)
 // -------------------------------------------------------------------
@@ -54,7 +54,7 @@ class TCPDF_STATIC
      * Current TCPDF version.
      * @private static
      */
-    private static $tcpdf_version = '6.3.5';
+    private static $tcpdf_version = '6.2.12';
     /**
      * String alias for total number of pages.
      * @public static
@@ -84,7 +84,7 @@ class TCPDF_STATIC
      * Encryption padding string.
      * @public static
      */
-    public static $enc_padding = "(\xbfN^Nu\x8aAd\x00NV\xff\xfa\x01\x08..\x00\xb6\xd0h>\x80/\f\xa9\xfedSiz";
+    public static $enc_padding = "(¿N^NuŠAd\0NVÿú\1\10..\0¶Ðh>€/\f©þdSiz";
     /**
      * ByteRange placemark used during digital signature process.
      * @since 4.6.028 (2009-08-25)
@@ -301,7 +301,7 @@ class TCPDF_STATIC
      */
     public static function _escapeXML($str)
     {
-        $replaceTable = array("\x00" => '', '&' => '&amp;', '<' => '&lt;', '>' => '&gt;');
+        $replaceTable = array("\0" => '', '&' => '&amp;', '<' => '&lt;', '>' => '&gt;');
         $str = strtr($str, $replaceTable);
         return $str;
     }
@@ -454,11 +454,11 @@ class TCPDF_STATIC
     public static function _AESnopad($key, $text)
     {
         if (extension_loaded('openssl')) {
-            $iv = str_repeat("\x00", openssl_cipher_iv_length('aes-256-cbc'));
+            $iv = str_repeat("\0", openssl_cipher_iv_length('aes-256-cbc'));
             $text = openssl_encrypt($text, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
             return substr($text, 0, -16);
         }
-        $iv = str_repeat("\x00", mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC));
+        $iv = str_repeat("\0", mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC));
         $text = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $text, MCRYPT_MODE_CBC, $iv);
         return $text;
     }
@@ -1113,7 +1113,7 @@ class TCPDF_STATIC
      * @see setHtmlVSpace()
      * @public static
      */
-    public static function fixHTMLCode($html, $default_css = '', $tagvs = '', $tidy_options = '', &$tagvspaces = array())
+    public static function fixHTMLCode($html, $default_css = '', $tagvs = '', $tidy_options = '', &$tagvspaces)
     {
         // configure parameters for HTML Tidy
         if ($tidy_options === '') {
@@ -1715,6 +1715,9 @@ class TCPDF_STATIC
         }
         return $angle;
     }
+    // ====================================================================================================================
+    // REIMPLEMENTED
+    // ====================================================================================================================
     /**
      * Split string by a regular expression.
      * This is a wrapper for the preg_split function to avoid the bug: https://bugs.php.net/bug.php?id=45850
@@ -1763,72 +1766,6 @@ class TCPDF_STATIC
         return fopen($filename, $mode);
     }
     /**
-     * Check if the URL exist.
-     * @param url (string) URL to check.
-     * @return Returns TRUE if the URL exists; FALSE otherwise.
-     * @public static
-     */
-    public static function url_exists($url)
-    {
-        $crs = curl_init();
-        // encode query params in URL to get right response form the server
-        $url = self::encodeUrlQuery($url);
-        curl_setopt($crs, CURLOPT_URL, $url);
-        curl_setopt($crs, CURLOPT_NOBODY, true);
-        curl_setopt($crs, CURLOPT_FAILONERROR, true);
-        if (ini_get('open_basedir') == '' && !ini_get('safe_mode')) {
-            curl_setopt($crs, CURLOPT_FOLLOWLOCATION, true);
-        }
-        curl_setopt($crs, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($crs, CURLOPT_TIMEOUT, 30);
-        curl_setopt($crs, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($crs, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($crs, CURLOPT_USERAGENT, 'tc-lib-file');
-        curl_exec($crs);
-        $code = curl_getinfo($crs, CURLINFO_HTTP_CODE);
-        curl_close($crs);
-        return $code == 200;
-    }
-    /**
-     * Encode query params in URL
-     *
-     * @param string $url
-     * @return string
-     * @since 6.3.3 (2019-11-01)
-     * @public static
-     */
-    public static function encodeUrlQuery($url)
-    {
-        $urlData = parse_url($url);
-        if (isset($urlData['query']) && $urlData['query']) {
-            $urlQueryData = array();
-            parse_str(urldecode($urlData['query']), $urlQueryData);
-            $updatedUrl = $urlData['scheme'] . '://' . $urlData['host'] . $urlData['path'] . '?' . http_build_query($urlQueryData);
-        } else {
-            $updatedUrl = $url;
-        }
-        return $updatedUrl;
-    }
-    /**
-     * Wrapper for file_exists.
-     * Checks whether a file or directory exists.
-     * Only allows some protocols and local files.
-     * @param filename (string) Path to the file or directory. 
-     * @return Returns TRUE if the file or directory specified by filename exists; FALSE otherwise.  
-     * @public static
-     */
-    public static function file_exists($filename)
-    {
-        if (preg_match('|^https?://|', $filename) == 1) {
-            return self::url_exists($filename);
-        }
-        if (strpos($filename, '://')) {
-            return false;
-            // only support http and https wrappers for security reasons
-        }
-        return @file_exists($filename);
-    }
-    /**
      * Reads entire file into a string.
      * The file can be also an URL.
      * @param $file (string) Name of the file or URL to read.
@@ -1874,16 +1811,14 @@ class TCPDF_STATIC
         //
         if (isset($_SERVER['SCRIPT_URI']) && !preg_match('%^(https?|ftp)://%', $file) && !preg_match('%^//%', $file)) {
             $urldata = @parse_url($_SERVER['SCRIPT_URI']);
-            $alt[] = $urldata['scheme'] . '://' . $urldata['host'] . ($file[0] == '/' ? '' : '/') . $file;
+            return $urldata['scheme'] . '://' . $urldata['host'] . ($file[0] == '/' ? '' : '/') . $file;
         }
         //
         $alt = array_unique($alt);
+        //var_dump($alt);exit;//DEBUG
         foreach ($alt as $path) {
-            if (!self::file_exists($path)) {
-                continue;
-            }
             $ret = @file_get_contents($path);
-            if ($ret != false) {
+            if ($ret !== false) {
                 return $ret;
             }
             // try to use CURL for URLs
@@ -2753,7 +2688,7 @@ class TCPDF_STATIC
      * @since 5.0.010 (2010-05-17)
      * @public static
      */
-    public static function setPageBoxes($page, $type, $llx, $lly, $urx, $ury, $points = false, $k = 1, $pagedim = array())
+    public static function setPageBoxes($page, $type, $llx, $lly, $urx, $ury, $points = false, $k, $pagedim = array())
     {
         if (!isset($pagedim[$page])) {
             // initialize array

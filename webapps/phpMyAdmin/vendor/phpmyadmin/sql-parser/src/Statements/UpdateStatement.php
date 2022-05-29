@@ -3,7 +3,7 @@
 /**
  * `UPDATE` statement.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Statements;
 
 use PhpMyAdmin\SqlParser\Components\Condition;
@@ -12,6 +12,7 @@ use PhpMyAdmin\SqlParser\Components\Limit;
 use PhpMyAdmin\SqlParser\Components\OrderKeyword;
 use PhpMyAdmin\SqlParser\Components\SetOperation;
 use PhpMyAdmin\SqlParser\Statement;
+
 /**
  * `UPDATE` statement.
  *
@@ -26,6 +27,10 @@ use PhpMyAdmin\SqlParser\Statement;
  * UPDATE [LOW_PRIORITY] [IGNORE] table_references
  *     SET col_name1={expr1|DEFAULT} [, col_name2={expr2|DEFAULT}] ...
  *     [WHERE where_condition]
+ *
+ * @category   Statements
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class UpdateStatement extends Statement
 {
@@ -34,7 +39,11 @@ class UpdateStatement extends Statement
      *
      * @var array
      */
-    public static $OPTIONS = array('LOW_PRIORITY' => 1, 'IGNORE' => 2);
+    public static $OPTIONS = array(
+        'LOW_PRIORITY' => 1,
+        'IGNORE' => 2,
+    );
+
     /**
      * The clauses of this statement, in order.
      *
@@ -53,30 +62,35 @@ class UpdateStatement extends Statement
         'ORDER BY' => array('ORDER BY', 3),
         'LIMIT' => array('LIMIT', 3),
     );
+
     /**
      * Tables used as sources for this statement.
      *
      * @var Expression[]
      */
     public $tables;
+
     /**
      * The updated values.
      *
      * @var SetOperation[]
      */
     public $set;
+
     /**
      * Conditions used for filtering each row of the result set.
      *
      * @var Condition[]
      */
     public $where;
+
     /**
      * Specifies the order of the rows in the result set.
      *
      * @var OrderKeyword[]
      */
     public $order;
+
     /**
      * Conditions used for limiting the size of the result set.
      *

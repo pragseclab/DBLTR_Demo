@@ -15,8 +15,8 @@ use Symfony\Component\Console\Descriptor\JsonDescriptor;
 use Symfony\Component\Console\Descriptor\MarkdownDescriptor;
 use Symfony\Component\Console\Descriptor\TextDescriptor;
 use Symfony\Component\Console\Descriptor\XmlDescriptor;
-use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 /**
  * This class adds helper method to describe objects in various formats.
  *
@@ -28,6 +28,9 @@ class DescriptorHelper extends Helper
      * @var DescriptorInterface[]
      */
     private $descriptors = array();
+    /**
+     * Constructor.
+     */
     public function __construct()
     {
         $this->register('txt', new TextDescriptor())->register('xml', new XmlDescriptor())->register('json', new JsonDescriptor())->register('md', new MarkdownDescriptor());
@@ -39,13 +42,15 @@ class DescriptorHelper extends Helper
      * * format: string, the output format name
      * * raw_text: boolean, sets output type as raw
      *
-     * @param object $object
+     * @param OutputInterface $output
+     * @param object          $object
+     * @param array           $options
      *
      * @throws InvalidArgumentException when the given format is not supported
      */
     public function describe(OutputInterface $output, $object, array $options = array())
     {
-        $options = array_merge(['raw_text' => false, 'format' => 'txt'], $options);
+        $options = array_merge(array('raw_text' => false, 'format' => 'txt'), $options);
         if (!isset($this->descriptors[$options['format']])) {
             throw new InvalidArgumentException(sprintf('Unsupported format "%s".', $options['format']));
         }
@@ -55,7 +60,8 @@ class DescriptorHelper extends Helper
     /**
      * Registers a descriptor.
      *
-     * @param string $format
+     * @param string              $format
+     * @param DescriptorInterface $descriptor
      *
      * @return $this
      */

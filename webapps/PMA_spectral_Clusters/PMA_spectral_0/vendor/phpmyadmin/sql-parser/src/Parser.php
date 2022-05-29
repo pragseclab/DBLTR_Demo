@@ -5,17 +5,18 @@
  *
  * This is one of the most important components, along with the lexer.
  */
-declare (strict_types=1);
 namespace PhpMyAdmin\SqlParser;
 
 use PhpMyAdmin\SqlParser\Exceptions\ParserException;
 use PhpMyAdmin\SqlParser\Statements\SelectStatement;
 use PhpMyAdmin\SqlParser\Statements\TransactionStatement;
-use function is_string;
-use function strtoupper;
 /**
  * Takes multiple tokens (contained in a Lexer instance) as input and builds a
  * parse tree.
+ *
+ * @category Parser
+ *
+ * @license  https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class Parser extends Core
 {
@@ -24,7 +25,7 @@ class Parser extends Core
      *
      * @var array
      */
-    public static $STATEMENT_PARSERS = [
+    public static $STATEMENT_PARSERS = array(
         // MySQL Utility Statements
         'DESCRIBE' => 'PhpMyAdmin\\SqlParser\\Statements\\ExplainStatement',
         'DESC' => 'PhpMyAdmin\\SqlParser\\Statements\\ExplainStatement',
@@ -77,78 +78,67 @@ class Parser extends Core
         'COMMIT' => 'PhpMyAdmin\\SqlParser\\Statements\\TransactionStatement',
         'ROLLBACK' => 'PhpMyAdmin\\SqlParser\\Statements\\TransactionStatement',
         'START TRANSACTION' => 'PhpMyAdmin\\SqlParser\\Statements\\TransactionStatement',
-        'PURGE' => 'PhpMyAdmin\\SqlParser\\Statements\\PurgeStatement',
-        // Lock statements
-        // https://dev.mysql.com/doc/refman/5.7/en/lock-tables.html
-        'LOCK' => 'PhpMyAdmin\\SqlParser\\Statements\\LockStatement',
-        'UNLOCK' => 'PhpMyAdmin\\SqlParser\\Statements\\LockStatement',
-    ];
+    );
     /**
      * Array of classes that are used in parsing SQL components.
      *
      * @var array
      */
-    public static $KEYWORD_PARSERS = [
+    public static $KEYWORD_PARSERS = array(
         // This is not a proper keyword and was added here to help the
         // formatter.
-        'PARTITION BY' => [],
-        'SUBPARTITION BY' => [],
+        'PARTITION BY' => array(),
+        'SUBPARTITION BY' => array(),
         // This is not a proper keyword and was added here to help the
         // builder.
-        '_OPTIONS' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\OptionsArray', 'field' => 'options'],
-        '_END_OPTIONS' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\OptionsArray', 'field' => 'end_options'],
-        'INTERSECT' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\UnionKeyword', 'field' => 'union'],
-        'EXCEPT' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\UnionKeyword', 'field' => 'union'],
-        'UNION' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\UnionKeyword', 'field' => 'union'],
-        'UNION ALL' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\UnionKeyword', 'field' => 'union'],
-        'UNION DISTINCT' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\UnionKeyword', 'field' => 'union'],
+        '_OPTIONS' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\OptionsArray', 'field' => 'options'),
+        '_END_OPTIONS' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\OptionsArray', 'field' => 'end_options'),
+        'UNION' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\UnionKeyword', 'field' => 'union'),
+        'UNION ALL' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\UnionKeyword', 'field' => 'union'),
+        'UNION DISTINCT' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\UnionKeyword', 'field' => 'union'),
         // Actual clause parsers.
-        'ALTER' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\Expression', 'field' => 'table', 'options' => ['parseField' => 'table']],
-        'ANALYZE' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => ['parseField' => 'table']],
-        'BACKUP' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => ['parseField' => 'table']],
-        'CALL' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\FunctionCall', 'field' => 'call'],
-        'CHECK' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => ['parseField' => 'table']],
-        'CHECKSUM' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => ['parseField' => 'table']],
-        'CROSS JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'DROP' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'fields', 'options' => ['parseField' => 'table']],
-        'FORCE' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\IndexHint', 'field' => 'index_hints'],
-        'FROM' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'from', 'options' => ['field' => 'table']],
-        'GROUP BY' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\GroupKeyword', 'field' => 'group'],
-        'HAVING' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\Condition', 'field' => 'having'],
-        'IGNORE' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\IndexHint', 'field' => 'index_hints'],
-        'INTO' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\IntoKeyword', 'field' => 'into'],
-        'JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'LEFT JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'LEFT OUTER JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'ON' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\Expression', 'field' => 'table', 'options' => ['parseField' => 'table']],
-        'RIGHT JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'RIGHT OUTER JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'INNER JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'FULL JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'FULL OUTER JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'NATURAL JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'NATURAL LEFT JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'NATURAL RIGHT JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'NATURAL LEFT OUTER JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'NATURAL RIGHT OUTER JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'STRAIGHT_JOIN' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'],
-        'LIMIT' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\Limit', 'field' => 'limit'],
-        'OPTIMIZE' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => ['parseField' => 'table']],
-        'ORDER BY' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\OrderKeyword', 'field' => 'order'],
-        'PARTITION' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ArrayObj', 'field' => 'partition'],
-        'PROCEDURE' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\FunctionCall', 'field' => 'procedure'],
-        'RENAME' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\RenameOperation', 'field' => 'renames'],
-        'REPAIR' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => ['parseField' => 'table']],
-        'RESTORE' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => ['parseField' => 'table']],
-        'SET' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\SetOperation', 'field' => 'set'],
-        'SELECT' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'expr'],
-        'TRUNCATE' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\Expression', 'field' => 'table', 'options' => ['parseField' => 'table']],
-        'UPDATE' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => ['parseField' => 'table']],
-        'USE' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\IndexHint', 'field' => 'index_hints'],
-        'VALUE' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\Array2d', 'field' => 'values'],
-        'VALUES' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\Array2d', 'field' => 'values'],
-        'WHERE' => ['class' => 'PhpMyAdmin\\SqlParser\\Components\\Condition', 'field' => 'where'],
-    ];
+        'ALTER' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\Expression', 'field' => 'table', 'options' => array('parseField' => 'table')),
+        'ANALYZE' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => array('parseField' => 'table')),
+        'BACKUP' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => array('parseField' => 'table')),
+        'CALL' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\FunctionCall', 'field' => 'call'),
+        'CHECK' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => array('parseField' => 'table')),
+        'CHECKSUM' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => array('parseField' => 'table')),
+        'CROSS JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'DROP' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'fields', 'options' => array('parseField' => 'table')),
+        'FROM' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'from', 'options' => array('field' => 'table')),
+        'GROUP BY' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\OrderKeyword', 'field' => 'group'),
+        'HAVING' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\Condition', 'field' => 'having'),
+        'INTO' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\IntoKeyword', 'field' => 'into'),
+        'JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'LEFT JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'LEFT OUTER JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'ON' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\Expression', 'field' => 'table', 'options' => array('parseField' => 'table')),
+        'RIGHT JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'RIGHT OUTER JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'INNER JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'FULL JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'FULL OUTER JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'NATURAL JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'NATURAL LEFT JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'NATURAL RIGHT JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'NATURAL LEFT OUTER JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'NATURAL RIGHT OUTER JOIN' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\JoinKeyword', 'field' => 'join'),
+        'LIMIT' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\Limit', 'field' => 'limit'),
+        'OPTIMIZE' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => array('parseField' => 'table')),
+        'ORDER BY' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\OrderKeyword', 'field' => 'order'),
+        'PARTITION' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ArrayObj', 'field' => 'partition'),
+        'PROCEDURE' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\FunctionCall', 'field' => 'procedure'),
+        'RENAME' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\RenameOperation', 'field' => 'renames'),
+        'REPAIR' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => array('parseField' => 'table')),
+        'RESTORE' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => array('parseField' => 'table')),
+        'SET' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\SetOperation', 'field' => 'set'),
+        'SELECT' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'expr'),
+        'TRUNCATE' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\Expression', 'field' => 'table', 'options' => array('parseField' => 'table')),
+        'UPDATE' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\ExpressionArray', 'field' => 'tables', 'options' => array('parseField' => 'table')),
+        'VALUE' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\Array2d', 'field' => 'values'),
+        'VALUES' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\Array2d', 'field' => 'values'),
+        'WHERE' => array('class' => 'PhpMyAdmin\\SqlParser\\Components\\Condition', 'field' => 'where'),
+    );
     /**
      * The list of tokens that are parsed.
      *
@@ -160,7 +150,7 @@ class Parser extends Core
      *
      * @var Statement[]
      */
-    public $statements = [];
+    public $statements = array();
     /**
      * The number of opened brackets.
      *
@@ -168,6 +158,8 @@ class Parser extends Core
      */
     public $brackets = 0;
     /**
+     * Constructor.
+     *
      * @param string|UtfString|TokensList $list   the list of tokens to be parsed
      * @param bool                        $strict whether strict mode should be enabled or not
      */
@@ -186,8 +178,6 @@ class Parser extends Core
     }
     /**
      * Builds the parse trees.
-     *
-     * @throws ParserException
      */
     public function parse()
     {
@@ -244,12 +234,12 @@ class Parser extends Core
             // Statements can start with keywords only.
             // Comments, whitespaces, etc. are ignored.
             if ($token->type !== Token::TYPE_KEYWORD) {
-                if ($token->type !== Token::TYPE_COMMENT && $token->type !== Token::TYPE_WHITESPACE && $token->type !== Token::TYPE_OPERATOR && $token->type !== Token::TYPE_DELIMITER) {
+                if ($token->type !== TOKEN::TYPE_COMMENT && $token->type !== Token::TYPE_WHITESPACE && $token->type !== Token::TYPE_OPERATOR && $token->type !== Token::TYPE_DELIMITER) {
                     $this->error('Unexpected beginning of statement.', $token);
                 }
                 continue;
             }
-            if ($token->keyword === 'UNION' || $token->keyword === 'UNION ALL' || $token->keyword === 'UNION DISTINCT' || $token->keyword === 'EXCEPT' || $token->keyword === 'INTERSECT') {
+            if ($token->keyword === 'UNION' || $token->keyword === 'UNION ALL' || $token->keyword === 'UNION DISTINCT') {
                 $unionType = $token->keyword;
                 continue;
             }
@@ -299,12 +289,12 @@ class Parser extends Core
                  *
                  * @var SelectStatement $lastStatement
                  */
-                $lastStatement->union[] = [$unionType, $statement];
+                $lastStatement->union[] = array($unionType, $statement);
                 // if there are no no delimiting brackets, the `ORDER` and
                 // `LIMIT` keywords actually belong to the first statement.
                 $lastStatement->order = $statement->order;
                 $lastStatement->limit = $statement->limit;
-                $statement->order = [];
+                $statement->order = array();
                 $statement->limit = null;
                 // The statement actually ends where the last statement in
                 // union ends.
@@ -355,12 +345,12 @@ class Parser extends Core
      * @param Token  $token the token that produced the error
      * @param int    $code  the code of the error
      *
-     * @throws ParserException throws the exception, if strict mode is enabled.
+     * @throws ParserException throws the exception, if strict mode is enabled
      */
-    public function error($msg, ?Token $token = null, $code = 0)
+    public function error($msg, Token $token = null, $code = 0)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("error") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Parser.php at line 362")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called error:362@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Parser.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("error") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Parser.php at line 565")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called error:565@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Parser.php');
         die();
     }
 }

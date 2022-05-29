@@ -5,7 +5,7 @@
  *
  * Used for parsing `CREATE TABLE` statement.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
@@ -13,13 +13,15 @@ use PhpMyAdmin\SqlParser\Context;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function implode;
-use function is_array;
-use function trim;
+
 /**
  * Parses the create definition of a column or a key.
  *
  * Used for parsing `CREATE TABLE` statement.
+ *
+ * @category   Components
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class CreateDefinition extends Component
 {
@@ -32,13 +34,10 @@ class CreateDefinition extends Component
         // Tells the `OptionsArray` to not sort the options.
         // See the note below.
         '_UNSORTED' => true,
+
         'NOT NULL' => 1,
         'NULL' => 1,
         'DEFAULT' => array(2, 'expr', array('breakOnAlias' => true)),
-        /* Following are not according to grammar, but MySQL happily accepts
-         * these at any location */
-        'CHARSET' => array(2, 'var'),
-        'COLLATE' => array(3, 'var'),
         'AUTO_INCREMENT' => 3,
         'PRIMARY' => 4,
         'PRIMARY KEY' => 4,
@@ -47,60 +46,87 @@ class CreateDefinition extends Component
         'COMMENT' => array(5, 'var'),
         'COLUMN_FORMAT' => array(6, 'var'),
         'ON UPDATE' => array(7, 'expr'),
+
         // Generated columns options.
         'GENERATED ALWAYS' => 8,
         'AS' => array(9, 'expr', array('parenthesesDelimited' => true)),
         'VIRTUAL' => 10,
         'PERSISTENT' => 11,
         'STORED' => 11,
-        'CHECK' => array(12, 'expr', array('parenthesesDelimited' => true)),
-        'INVISIBLE' => 13,
+        // Common entries.
+        //
+        // NOTE: Some of the common options are not in the same order which
+        // causes troubles when checking if the options are in the right order.
+        // I should find a way to define multiple sets of options and make the
+        // parser select the right set.
+        //
+        // 'UNIQUE'                        => 4,
+        // 'UNIQUE KEY'                    => 4,
+        // 'COMMENT'                       => array(5, 'var'),
+        // 'NOT NULL'                      => 1,
+        // 'NULL'                          => 1,
+        // 'PRIMARY'                       => 4,
+        // 'PRIMARY KEY'                   => 4,
     );
+
     /**
      * The name of the new column.
      *
      * @var string
      */
     public $name;
+
     /**
      * Whether this field is a constraint or not.
      *
      * @var bool
      */
     public $isConstraint;
+
     /**
      * The data type of thew new column.
      *
      * @var DataType
      */
     public $type;
+
     /**
      * The key.
      *
      * @var Key
      */
     public $key;
+
     /**
      * The table that is referenced.
      *
      * @var Reference
      */
     public $references;
+
     /**
      * The options of this field.
      *
      * @var OptionsArray
      */
     public $options;
+
     /**
+     * Constructor.
+     *
      * @param string       $name         the name of the field
      * @param OptionsArray $options      the options of this field
      * @param DataType|Key $type         the data type of this field or the key
      * @param bool         $isConstraint whether this field is a constraint or not
      * @param Reference    $references   references
      */
-    public function __construct($name = null, $options = null, $type = null, $isConstraint = false, $references = null)
-    {
+    public function __construct(
+        $name = null,
+        $options = null,
+        $type = null,
+        $isConstraint = false,
+        $references = null
+    ) {
         $this->name = $name;
         $this->options = $options;
         if ($type instanceof DataType) {
@@ -111,6 +137,7 @@ class CreateDefinition extends Component
             $this->references = $references;
         }
     }
+
     /**
      * @param Parser     $parser  the parser that serves as context
      * @param TokensList $list    the list of tokens that are being parsed
@@ -120,8 +147,10 @@ class CreateDefinition extends Component
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = [];
-        $expr = new static();
+        $ret = array();
+
+        $expr = new self();
+
         /**
          * The state of the parser.
          *
@@ -145,6 +174,7 @@ class CreateDefinition extends Component
          * @var int
          */
         $state = 0;
+
         for (; $list->idx < $list->count; ++$list->idx) {
             /**
              * Token parsed at this moment.
@@ -152,25 +182,32 @@ class CreateDefinition extends Component
              * @var Token
              */
             $token = $list->tokens[$list->idx];
+
             // End of statement.
             if ($token->type === Token::TYPE_DELIMITER) {
                 break;
             }
+
             // Skipping whitespaces and comments.
-            if ($token->type === Token::TYPE_WHITESPACE || $token->type === Token::TYPE_COMMENT) {
+            if (($token->type === Token::TYPE_WHITESPACE) || ($token->type === Token::TYPE_COMMENT)) {
                 continue;
             }
+
             if ($state === 0) {
-                if ($token->type === Token::TYPE_OPERATOR && $token->value === '(') {
+                if (($token->type === Token::TYPE_OPERATOR) && ($token->value === '(')) {
                     $state = 1;
                 } else {
-                    $parser->error('An opening bracket was expected.', $token);
+                    $parser->error(
+                        'An opening bracket was expected.',
+                        $token
+                    );
+
                     break;
                 }
             } elseif ($state === 1) {
                 if ($token->type === Token::TYPE_KEYWORD && $token->keyword === 'CONSTRAINT') {
                     $expr->isConstraint = true;
-                } elseif ($token->type === Token::TYPE_KEYWORD && $token->flags & Token::FLAG_KEYWORD_KEY) {
+                } elseif (($token->type === Token::TYPE_KEYWORD) && ($token->flags & Token::FLAG_KEYWORD_KEY)) {
                     $expr->key = Key::parse($parser, $list);
                     $state = 4;
                 } elseif ($token->type === Token::TYPE_SYMBOL || $token->type === Token::TYPE_NONE) {
@@ -182,14 +219,25 @@ class CreateDefinition extends Component
                     if ($token->flags & Token::FLAG_KEYWORD_RESERVED) {
                         // Reserved keywords can't be used
                         // as field names without backquotes
-                        $parser->error('A symbol name was expected! ' . 'A reserved keyword can not be used ' . 'as a column name without backquotes.', $token);
+                        $parser->error(
+                            'A symbol name was expected! '
+                            . 'A reserved keyword can not be used '
+                            . 'as a column name without backquotes.',
+                            $token
+                        );
+
                         return $ret;
                     }
+
                     // Non-reserved keywords are allowed without backquotes
                     $expr->name = $token->value;
                     $state = 2;
                 } else {
-                    $parser->error('A symbol name was expected!', $token);
+                    $parser->error(
+                        'A symbol name was expected!',
+                        $token
+                    );
+
                     return $ret;
                 }
             } elseif ($state === 2) {
@@ -200,18 +248,17 @@ class CreateDefinition extends Component
                 $state = 4;
             } elseif ($state === 4) {
                 if ($token->type === Token::TYPE_KEYWORD && $token->keyword === 'REFERENCES') {
-                    ++$list->idx;
-                    // Skipping keyword 'REFERENCES'.
+                    ++$list->idx; // Skipping keyword 'REFERENCES'.
                     $expr->references = Reference::parse($parser, $list);
                 } else {
                     --$list->idx;
                 }
                 $state = 5;
             } elseif ($state === 5) {
-                if (!empty($expr->type) || !empty($expr->key)) {
+                if ((!empty($expr->type)) || (!empty($expr->key))) {
                     $ret[] = $expr;
                 }
-                $expr = new static();
+                $expr = new self();
                 if ($token->value === ',') {
                     $state = 1;
                 } elseif ($token->value === ')') {
@@ -219,22 +266,33 @@ class CreateDefinition extends Component
                     ++$list->idx;
                     break;
                 } else {
-                    $parser->error('A comma or a closing bracket was expected.', $token);
+                    $parser->error(
+                        'A comma or a closing bracket was expected.',
+                        $token
+                    );
                     $state = 0;
                     break;
                 }
             }
         }
+
         // Last iteration was not saved.
-        if (!empty($expr->type) || !empty($expr->key)) {
+        if ((!empty($expr->type)) || (!empty($expr->key))) {
             $ret[] = $expr;
         }
-        if ($state !== 0 && $state !== 6) {
-            $parser->error('A closing bracket was expected.', $list->tokens[$list->idx - 1]);
+
+        if (($state !== 0) && ($state !== 6)) {
+            $parser->error(
+                'A closing bracket was expected.',
+                $list->tokens[$list->idx - 1]
+            );
         }
+
         --$list->idx;
+
         return $ret;
     }
+
     /**
      * @param CreateDefinition|CreateDefinition[] $component the component to be built
      * @param array                               $options   parameters for building
@@ -246,23 +304,34 @@ class CreateDefinition extends Component
         if (is_array($component)) {
             return "(\n  " . implode(",\n  ", $component) . "\n)";
         }
+
         $tmp = '';
+
         if ($component->isConstraint) {
             $tmp .= 'CONSTRAINT ';
         }
-        if (isset($component->name) && $component->name !== '') {
+
+        if ((isset($component->name)) && ($component->name !== '')) {
             $tmp .= Context::escape($component->name) . ' ';
         }
+
         if (!empty($component->type)) {
-            $tmp .= DataType::build($component->type, ['lowercase' => true]) . ' ';
+            $tmp .= DataType::build(
+                $component->type,
+                array('lowercase' => true)
+            ) . ' ';
         }
+
         if (!empty($component->key)) {
             $tmp .= $component->key . ' ';
         }
+
         if (!empty($component->references)) {
             $tmp .= 'REFERENCES ' . $component->references . ' ';
         }
+
         $tmp .= $component->options;
+
         return trim($tmp);
     }
 }

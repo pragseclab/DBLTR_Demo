@@ -18,27 +18,27 @@ use Symfony\Component\Console\Formatter\OutputFormatterInterface;
  */
 interface OutputInterface
 {
-    public const VERBOSITY_QUIET = 16;
-    public const VERBOSITY_NORMAL = 32;
-    public const VERBOSITY_VERBOSE = 64;
-    public const VERBOSITY_VERY_VERBOSE = 128;
-    public const VERBOSITY_DEBUG = 256;
-    public const OUTPUT_NORMAL = 1;
-    public const OUTPUT_RAW = 2;
-    public const OUTPUT_PLAIN = 4;
+    const VERBOSITY_QUIET = 16;
+    const VERBOSITY_NORMAL = 32;
+    const VERBOSITY_VERBOSE = 64;
+    const VERBOSITY_VERY_VERBOSE = 128;
+    const VERBOSITY_DEBUG = 256;
+    const OUTPUT_NORMAL = 1;
+    const OUTPUT_RAW = 2;
+    const OUTPUT_PLAIN = 4;
     /**
      * Writes a message to the output.
      *
-     * @param string|iterable $messages The message as an iterable of strings or a single string
-     * @param bool            $newline  Whether to add a newline
-     * @param int             $options  A bitmask of options (one of the OUTPUT or VERBOSITY constants), 0 is considered the same as self::OUTPUT_NORMAL | self::VERBOSITY_NORMAL
+     * @param string|array $messages The message as an array of lines or a single string
+     * @param bool         $newline  Whether to add a newline
+     * @param int          $options  A bitmask of options (one of the OUTPUT or VERBOSITY constants), 0 is considered the same as self::OUTPUT_NORMAL | self::VERBOSITY_NORMAL
      */
     public function write($messages, $newline = false, $options = 0);
     /**
      * Writes a message to the output and adds a newline at the end.
      *
-     * @param string|iterable $messages The message as an iterable of strings or a single string
-     * @param int             $options  A bitmask of options (one of the OUTPUT or VERBOSITY constants), 0 is considered the same as self::OUTPUT_NORMAL | self::VERBOSITY_NORMAL
+     * @param string|array $messages The message as an array of lines of a single string
+     * @param int          $options  A bitmask of options (one of the OUTPUT or VERBOSITY constants), 0 is considered the same as self::OUTPUT_NORMAL | self::VERBOSITY_NORMAL
      */
     public function writeln($messages, $options = 0);
     /**
@@ -89,6 +89,11 @@ interface OutputInterface
      * @return bool true if the output will decorate messages, false otherwise
      */
     public function isDecorated();
+    /**
+     * Sets output formatter.
+     *
+     * @param OutputFormatterInterface $formatter
+     */
     public function setFormatter(OutputFormatterInterface $formatter);
     /**
      * Returns current output formatter instance.

@@ -8,9 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Doubler\ClassPatch;
 
 use Prophecy\Doubler\Generator\Node\ClassNode;
+
 /**
  * ReflectionClass::newInstance patch.
  * Makes first argument of newInstance optional, since it works but signature is misleading
@@ -30,6 +32,7 @@ class ReflectionClassNewInstancePatch implements ClassPatchInterface
     {
         return 'ReflectionClass' === $node->getParentClass();
     }
+
     /**
      * Updates newInstance's first argument to make it optional
      *
@@ -41,6 +44,7 @@ class ReflectionClassNewInstancePatch implements ClassPatchInterface
             $argument->setDefault(null);
         }
     }
+
     /**
      * Returns patch priority, which determines when patch will be applied.
      *

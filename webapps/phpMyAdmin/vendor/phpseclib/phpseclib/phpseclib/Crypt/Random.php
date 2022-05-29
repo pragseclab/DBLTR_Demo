@@ -21,6 +21,7 @@
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  * @link      http://phpseclib.sourceforge.net
  */
+
 namespace phpseclib\Crypt;
 
 /**
@@ -44,9 +45,6 @@ class Random
      */
     static function string($length)
     {
-        if (!$length) {
-            return '';
-        }
         if (version_compare(PHP_VERSION, '7.0.0', '>=')) {
             try {
                 return \random_bytes($length);
@@ -59,11 +57,12 @@ class Random
                 // the PHP implementation.
             }
         }
+
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             // method 1. prior to PHP 5.3 this would call rand() on windows hence the function_exists('class_alias') call.
             // ie. class_alias is a function that was introduced in PHP 5.3
             if (extension_loaded('mcrypt') && function_exists('class_alias')) {
-                return @mcrypt_create_iv($length);
+                return mcrypt_create_iv($length);
             }
             // method 2. openssl_random_pseudo_bytes was introduced in PHP 5.3.0 but prior to PHP 5.3.4 there was,
             // to quote <http://php.net/ChangeLog-5.php#5.3.4>, "possible blocking behavior". as of 5.3.4
@@ -93,12 +92,8 @@ class Random
                 // "open_basedir restriction in effect", "Permission denied", "No such file or directory", etc.
                 $fp = @fopen('/dev/urandom', 'rb');
             }
-            if ($fp !== true && $fp !== false) {
-                // surprisingly faster than !is_bool() or is_resource()
-                $temp = fread($fp, $length);
-                if (strlen($temp) == $length) {
-                    return $temp;
-                }
+            if ($fp !== true && $fp !== false) { // surprisingly faster than !is_bool() or is_resource()
+                return fread($fp, $length);
             }
             // method 3. pretty much does the same thing as method 2 per the following url:
             // https://github.com/php/php-src/blob/7014a0eb6d1611151a286c0ff4f2238f92c120d6/ext/mcrypt/mcrypt.c#L1391
@@ -106,10 +101,11 @@ class Random
             // not doing. regardless, this'll only be called if this PHP script couldn't open /dev/urandom due to open_basedir
             // restrictions or some such
             if (extension_loaded('mcrypt')) {
-                return @mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
+                return mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
             }
         }
         // at this point we have no choice but to use a pure-PHP CSPRNG
+
         // cascade entropy across multiple PHP instances by fixing the session and collecting all
         // environmental variables, including the previous session data and the current session
         // data.
@@ -137,16 +133,28 @@ class Random
             if ($old_session_id != '') {
                 session_write_close();
             }
+
             session_id(1);
             ini_set('session.use_cookies', 0);
             session_cache_limiter('');
             session_start();
-            $v = $seed = $_SESSION['seed'] = pack('H*', sha1((isset($_SERVER) ? phpseclib_safe_serialize($_SERVER) : '') . (isset($_POST) ? phpseclib_safe_serialize($_POST) : '') . (isset($_GET) ? phpseclib_safe_serialize($_GET) : '') . (isset($_COOKIE) ? phpseclib_safe_serialize($_COOKIE) : '') . phpseclib_safe_serialize($GLOBALS) . phpseclib_safe_serialize($_SESSION) . phpseclib_safe_serialize($_OLD_SESSION)));
+
+            $v = $seed = $_SESSION['seed'] = pack('H*', sha1(
+                (isset($_SERVER) ? phpseclib_safe_serialize($_SERVER) : '') .
+                (isset($_POST) ? phpseclib_safe_serialize($_POST) : '') .
+                (isset($_GET) ? phpseclib_safe_serialize($_GET) : '') .
+                (isset($_COOKIE) ? phpseclib_safe_serialize($_COOKIE) : '') .
+                phpseclib_safe_serialize($GLOBALS) .
+                phpseclib_safe_serialize($_SESSION) .
+                phpseclib_safe_serialize($_OLD_SESSION)
+            ));
             if (!isset($_SESSION['count'])) {
                 $_SESSION['count'] = 0;
             }
             $_SESSION['count']++;
+
             session_write_close();
+
             // restore old session data
             if ($old_session_id != '') {
                 session_id($old_session_id);
@@ -161,6 +169,7 @@ class Random
                     unset($_SESSION);
                 }
             }
+
             // in SSH2 a shared secret and an exchange hash are generated through the key exchange process.
             // the IV client to server is the hash of that "nonce" with the letter A and for the encryption key it's the letter C.
             // if the hash doesn't produce enough a key or an IV that's long enough concat successive hashes of the
@@ -171,37 +180,41 @@ class Random
             // see the is_string($crypto) part for an example of how to expand the keys
             $key = pack('H*', sha1($seed . 'A'));
             $iv = pack('H*', sha1($seed . 'C'));
+
             // ciphers are used as per the nist.gov link below. also, see this link:
             //
             // http://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator#Designs_based_on_cryptographic_primitives
             switch (true) {
-                case class_exists('\\phpseclib\\Crypt\\AES'):
+                case class_exists('\phpseclib\Crypt\AES'):
                     $crypto = new AES(Base::MODE_CTR);
                     break;
-                case class_exists('\\phpseclib\\Crypt\\Twofish'):
+                case class_exists('\phpseclib\Crypt\Twofish'):
                     $crypto = new Twofish(Base::MODE_CTR);
                     break;
-                case class_exists('\\phpseclib\\Crypt\\Blowfish'):
+                case class_exists('\phpseclib\Crypt\Blowfish'):
                     $crypto = new Blowfish(Base::MODE_CTR);
                     break;
-                case class_exists('\\phpseclib\\Crypt\\TripleDES'):
+                case class_exists('\phpseclib\Crypt\TripleDES'):
                     $crypto = new TripleDES(Base::MODE_CTR);
                     break;
-                case class_exists('\\phpseclib\\Crypt\\DES'):
+                case class_exists('\phpseclib\Crypt\DES'):
                     $crypto = new DES(Base::MODE_CTR);
                     break;
-                case class_exists('\\phpseclib\\Crypt\\RC4'):
+                case class_exists('\phpseclib\Crypt\RC4'):
                     $crypto = new RC4();
                     break;
                 default:
                     user_error(__CLASS__ . ' requires at least one symmetric cipher be loaded');
                     return false;
             }
+
             $crypto->setKey($key);
             $crypto->setIV($iv);
             $crypto->enableContinuousBuffer();
         }
+
         //return $crypto->encrypt(str_repeat("\0", $length));
+
         // the following is based off of ANSI X9.31:
         //
         // http://csrc.nist.gov/groups/STM/cavp/documents/rng/931rngext.pdf
@@ -212,17 +225,15 @@ class Random
         // (do a search for "ANS X9.31 A.2.4")
         $result = '';
         while (strlen($result) < $length) {
-            $i = $crypto->encrypt(microtime());
-            // strlen(microtime()) == 21
-            $r = $crypto->encrypt($i ^ $v);
-            // strlen($v) == 20
-            $v = $crypto->encrypt($r ^ $i);
-            // strlen($r) == 20
-            $result .= $r;
+            $i = $crypto->encrypt(microtime()); // strlen(microtime()) == 21
+            $r = $crypto->encrypt($i ^ $v); // strlen($v) == 20
+            $v = $crypto->encrypt($r ^ $i); // strlen($r) == 20
+            $result.= $r;
         }
         return substr($result, 0, $length);
     }
 }
+
 if (!function_exists('phpseclib_safe_serialize')) {
     /**
      * Safely serialize variables

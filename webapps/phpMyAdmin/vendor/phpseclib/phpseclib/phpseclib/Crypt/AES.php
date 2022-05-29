@@ -46,6 +46,7 @@
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  * @link      http://phpseclib.sourceforge.net
  */
+
 namespace phpseclib\Crypt;
 
 /**
@@ -70,6 +71,7 @@ class AES extends Rijndael
     {
         return;
     }
+
     /**
      * Sets the key length
      *
@@ -91,6 +93,7 @@ class AES extends Rijndael
         }
         parent::setKeyLength($length);
     }
+
     /**
      * Sets the key.
      *
@@ -104,6 +107,7 @@ class AES extends Rijndael
     function setKey($key)
     {
         parent::setKey($key);
+
         if (!$this->explicit_key_length) {
             $length = strlen($key);
             switch (true) {

@@ -8,9 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Symfony\Component\Cache\Adapter;
 
 use Psr\Cache\InvalidArgumentException;
+
 /**
  * Interface for invalidating cached items using tags.
  *

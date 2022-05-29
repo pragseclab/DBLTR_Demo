@@ -1,5 +1,0 @@
-- Created a new “test_db” database.
-- Added indexes on important tables in WordPress and Magento database.
-- Looked at the memory usage of mysql through phpMyAdmin.
-- Imported a new database.
-- Backed up existing database in “SQL” format.

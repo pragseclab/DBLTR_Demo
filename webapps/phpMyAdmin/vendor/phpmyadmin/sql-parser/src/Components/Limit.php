@@ -3,15 +3,20 @@
 /**
  * `LIMIT` keyword parser.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
+
 /**
  * `LIMIT` keyword parser.
+ *
+ * @category   Keywords
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class Limit extends Component
 {
@@ -21,13 +26,17 @@ class Limit extends Component
      * @var int
      */
     public $offset;
+
     /**
      * The number of rows to be returned.
      *
      * @var int
      */
     public $rowCount;
+
     /**
+     * Constructor.
+     *
      * @param int $rowCount the row count
      * @param int $offset   the offset
      */
@@ -36,6 +45,7 @@ class Limit extends Component
         $this->rowCount = $rowCount;
         $this->offset = $offset;
     }
+
     /**
      * @param Parser     $parser  the parser that serves as context
      * @param TokensList $list    the list of tokens that are being parsed
@@ -45,8 +55,10 @@ class Limit extends Component
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = new static();
+        $ret = new self();
+
         $offset = false;
+
         for (; $list->idx < $list->count; ++$list->idx) {
             /**
              * Token parsed at this moment.
@@ -54,17 +66,21 @@ class Limit extends Component
              * @var Token
              */
             $token = $list->tokens[$list->idx];
+
             // End of statement.
             if ($token->type === Token::TYPE_DELIMITER) {
                 break;
             }
+
             // Skipping whitespaces and comments.
-            if ($token->type === Token::TYPE_WHITESPACE || $token->type === Token::TYPE_COMMENT) {
+            if (($token->type === Token::TYPE_WHITESPACE) || ($token->type === Token::TYPE_COMMENT)) {
                 continue;
             }
-            if ($token->type === Token::TYPE_KEYWORD && $token->flags & Token::FLAG_KEYWORD_RESERVED) {
+
+            if (($token->type === Token::TYPE_KEYWORD) && ($token->flags & Token::FLAG_KEYWORD_RESERVED)) {
                 break;
             }
+
             if ($token->type === Token::TYPE_KEYWORD && $token->keyword === 'OFFSET') {
                 if ($offset) {
                     $parser->error('An offset was expected.', $token);
@@ -72,15 +88,13 @@ class Limit extends Component
                 $offset = true;
                 continue;
             }
-            if ($token->type === Token::TYPE_OPERATOR && $token->value === ',') {
+
+            if (($token->type === Token::TYPE_OPERATOR) && ($token->value === ',')) {
                 $ret->offset = $ret->rowCount;
                 $ret->rowCount = 0;
                 continue;
             }
-            // Skip if not a number
-            if ($token->type !== Token::TYPE_NUMBER) {
-                break;
-            }
+
             if ($offset) {
                 $ret->offset = $token->value;
                 $offset = false;
@@ -88,12 +102,19 @@ class Limit extends Component
                 $ret->rowCount = $token->value;
             }
         }
+
         if ($offset) {
-            $parser->error('An offset was expected.', $list->tokens[$list->idx - 1]);
+            $parser->error(
+                'An offset was expected.',
+                $list->tokens[$list->idx - 1]
+            );
         }
+
         --$list->idx;
+
         return $ret;
     }
+
     /**
      * @param Limit $component the component to be built
      * @param array $options   parameters for building

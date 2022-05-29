@@ -1,6 +1,5 @@
 <?php
 
-declare (strict_types=1);
 /*
     Copyright (c) 2003, 2009 Danilo Segan <danilo@kvota.net>.
     Copyright (c) 2005 Nico Kaiser <nico@siriux.net>
@@ -25,23 +24,6 @@ declare (strict_types=1);
 namespace PhpMyAdmin\MoTranslator;
 
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use Throwable;
-use function array_key_exists;
-use function chr;
-use function count;
-use function explode;
-use function implode;
-use function intval;
-use function is_readable;
-use function ltrim;
-use function preg_replace;
-use function rtrim;
-use function strcmp;
-use function stripos;
-use function strpos;
-use function strtolower;
-use function substr;
-use function trim;
 /**
  * Provides a simple gettext replacement that works independently from
  * the system's gettext abilities.
@@ -54,27 +36,27 @@ class Translator
     /**
      * None error.
      */
-    public const ERROR_NONE = 0;
+    const ERROR_NONE = 0;
     /**
      * File does not exist.
      */
-    public const ERROR_DOES_NOT_EXIST = 1;
+    const ERROR_DOES_NOT_EXIST = 1;
     /**
      * File has bad magic number.
      */
-    public const ERROR_BAD_MAGIC = 2;
+    const ERROR_BAD_MAGIC = 2;
     /**
      * Error while reading file, probably too short.
      */
-    public const ERROR_READING = 3;
+    const ERROR_READING = 3;
     /**
      * Big endian mo file magic bytes.
      */
-    public const MAGIC_BE = "\x95\x04\x12\xde";
+    const MAGIC_BE = "\x95\x04\x12\xde";
     /**
      * Little endian mo file magic bytes.
      */
-    public const MAGIC_LE = "\xde\x12\x04\x95";
+    const MAGIC_LE = "\xde\x12\x04\x95";
     /**
      * Parse error code (0 if no error).
      *
@@ -86,34 +68,27 @@ class Translator
      *
      * @var string|null
      */
-    private $pluralEquation = null;
-    /** @var ExpressionLanguage|null Evaluator for plurals */
-    private $pluralExpression = null;
-    /** @var int|null number of plurals */
-    private $pluralCount = null;
+    private $pluralequation = null;
+    /**
+     * @var ExpressionLanguage|null Evaluator for plurals
+     */
+    private $pluralexpression = null;
+    /**
+     * @var int|null number of plurals
+     */
+    private $pluralcount = null;
     /**
      * Array with original -> translation mapping.
      *
-     * @var array<string,string>
+     * @var array
      */
-    private $cacheTranslations = [];
+    private $cache_translations = array();
     /**
-     * @param string|null $filename Name of mo file to load (null to not load a file)
-     */
-    public function __construct(?string $filename)
-    {
-        // The user can load the translations manually
-        if ($filename === null) {
-            return;
-        }
-        $this->loadTranslationsFromFile($filename);
-    }
-    /**
-     * Load a Mo file translations
+     * Constructor.
      *
      * @param string $filename Name of mo file to load
      */
-    private function loadTranslationsFromFile(string $filename) : void
+    public function __construct($filename)
     {
         if (!is_readable($filename)) {
             $this->error = self::ERROR_DOES_NOT_EXIST;
@@ -122,9 +97,9 @@ class Translator
         $stream = new StringReader($filename);
         try {
             $magic = $stream->read(0, 4);
-            if (strcmp($magic, self::MAGIC_LE) === 0) {
+            if (strcmp($magic, self::MAGIC_LE) == 0) {
                 $unpack = 'V';
-            } elseif (strcmp($magic, self::MAGIC_BE) === 0) {
+            } elseif (strcmp($magic, self::MAGIC_BE) == 0) {
                 $unpack = 'N';
             } else {
                 $this->error = self::ERROR_BAD_MAGIC;
@@ -135,18 +110,13 @@ class Translator
             $originals = $stream->readint($unpack, 12);
             $translations = $stream->readint($unpack, 16);
             /* get original and translations tables */
-            $totalTimesTwo = (int) ($total * 2);
-            // Fix for issue #36 on ARM
-            $tableOriginals = $stream->readintarray($unpack, $originals, $totalTimesTwo);
-            $tableTranslations = $stream->readintarray($unpack, $translations, $totalTimesTwo);
+            $table_originals = $stream->readintarray($unpack, $originals, $total * 2);
+            $table_translations = $stream->readintarray($unpack, $translations, $total * 2);
             /* read all strings to the cache */
             for ($i = 0; $i < $total; ++$i) {
-                $iTimesTwo = $i * 2;
-                $iPlusOne = $iTimesTwo + 1;
-                $iPlusTwo = $iTimesTwo + 2;
-                $original = $stream->read($tableOriginals[$iPlusTwo], $tableOriginals[$iPlusOne]);
-                $translation = $stream->read($tableTranslations[$iPlusTwo], $tableTranslations[$iPlusOne]);
-                $this->cacheTranslations[$original] = $translation;
+                $original = $stream->read($table_originals[$i * 2 + 2], $table_originals[$i * 2 + 1]);
+                $translation = $stream->read($table_translations[$i * 2 + 2], $table_translations[$i * 2 + 1]);
+                $this->cache_translations[$original] = $translation;
             }
         } catch (ReaderException $e) {
             $this->error = self::ERROR_READING;
@@ -160,23 +130,13 @@ class Translator
      *
      * @return string translated string (or original, if not found)
      */
-    public function gettext(string $msgid) : string
+    public function gettext($msgid)
     {
-        if (array_key_exists($msgid, $this->cacheTranslations)) {
-            return $this->cacheTranslations[$msgid];
+        if (array_key_exists($msgid, $this->cache_translations)) {
+            return $this->cache_translations[$msgid];
+        } else {
+            return $msgid;
         }
-        return $msgid;
-    }
-    /**
-     * Check if a string is translated.
-     *
-     * @param string $msgid String to be checked
-     */
-    public function exists(string $msgid) : bool
-    {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("exists") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 177")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called exists:177@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
-        die();
     }
     /**
      * Sanitize plural form expression for use in ExpressionLanguage.
@@ -185,10 +145,10 @@ class Translator
      *
      * @return string sanitized plural form expression
      */
-    public static function sanitizePluralExpression(string $expr) : string
+    public static function sanitizePluralExpression($expr)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("sanitizePluralExpression") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 189")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called sanitizePluralExpression:189@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("sanitizePluralExpression") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 166")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called sanitizePluralExpression:166@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
         die();
     }
     /**
@@ -198,10 +158,10 @@ class Translator
      *
      * @return int Total number of plurals
      */
-    public static function extractPluralCount(string $expr) : int
+    public static function extractPluralCount($expr)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("extractPluralCount") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 217")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called extractPluralCount:217@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("extractPluralCount") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 194")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called extractPluralCount:194@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
         die();
     }
     /**
@@ -211,10 +171,10 @@ class Translator
      *
      * @return string verbatim plural form header field
      */
-    public static function extractPluralsForms(string $header) : string
+    public static function extractPluralsForms($header)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("extractPluralsForms") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 236")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called extractPluralsForms:236@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("extractPluralsForms") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 212")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called extractPluralsForms:212@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
         die();
     }
     /**
@@ -222,10 +182,10 @@ class Translator
      *
      * @return string plural form header
      */
-    private function getPluralForms() : string
+    private function getPluralForms()
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("getPluralForms") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 256")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called getPluralForms:256@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("getPluralForms") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 234")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called getPluralForms:234@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
         die();
     }
     /**
@@ -235,10 +195,10 @@ class Translator
      *
      * @return int array index of the right plural form
      */
-    private function selectString(int $n) : int
+    private function selectString($n)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("selectString") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 277")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called selectString:277@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("selectString") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 253")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called selectString:253@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
         die();
     }
     /**
@@ -250,27 +210,17 @@ class Translator
      *
      * @return string translated plural form
      */
-    public function ngettext(string $msgid, string $msgidPlural, int $number) : string
+    public function ngettext($msgid, $msgidPlural, $number)
     {
         // this should contains all strings separated by NULLs
-        $key = implode(chr(0), [$msgid, $msgidPlural]);
-        if (!array_key_exists($key, $this->cacheTranslations)) {
-            return $number !== 1 ? $msgidPlural : $msgid;
+        $key = implode(chr(0), array($msgid, $msgidPlural));
+        if (!array_key_exists($key, $this->cache_translations)) {
+            return $number != 1 ? $msgidPlural : $msgid;
         }
         // find out the appropriate form
         $select = $this->selectString($number);
-        $result = $this->cacheTranslations[$key];
+        $result = $this->cache_translations[$key];
         $list = explode(chr(0), $result);
-        // @codeCoverageIgnoreStart
-        if ($list === false) {
-            // This was added in 3ff2c63bcf85f81b3a205ce7222de11b33e2bf56 for phpstan
-            // But according to the php manual it should never happen
-            return '';
-        }
-        // @codeCoverageIgnoreEnd
-        if (!isset($list[$select])) {
-            return $list[0];
-        }
         return $list[$select];
     }
     /**
@@ -281,14 +231,15 @@ class Translator
      *
      * @return string translated plural form
      */
-    public function pgettext(string $msgctxt, string $msgid) : string
+    public function pgettext($msgctxt, $msgid)
     {
-        $key = implode(chr(4), [$msgctxt, $msgid]);
+        $key = implode(chr(4), array($msgctxt, $msgid));
         $ret = $this->gettext($key);
         if (strpos($ret, chr(4)) !== false) {
             return $msgid;
+        } else {
+            return $ret;
         }
-        return $ret;
     }
     /**
      * Plural version of pgettext.
@@ -300,44 +251,10 @@ class Translator
      *
      * @return string translated plural form
      */
-    public function npgettext(string $msgctxt, string $msgid, string $msgidPlural, int $number) : string
+    public function npgettext($msgctxt, $msgid, $msgidPlural, $number)
     {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("npgettext") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 351")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called npgettext:351@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
-        die();
-    }
-    /**
-     * Set translation in place
-     *
-     * @param string $msgid  String to be set
-     * @param string $msgstr Translation
-     */
-    public function setTranslation(string $msgid, string $msgstr) : void
-    {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("setTranslation") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 366")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called setTranslation:366@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
-        die();
-    }
-    /**
-     * Set the translations
-     *
-     * @param array<string,string> $translations The translations "key => value" array
-     */
-    public function setTranslations(array $translations) : void
-    {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("setTranslations") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 375")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called setTranslations:375@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
-        die();
-    }
-    /**
-     * Get the translations
-     *
-     * @return array<string,string> The translations "key => value" array
-     */
-    public function getTranslations() : array
-    {
-        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("getTranslations") from ("/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 384")                </p>            </div>        </div>    </div></body></html>');
-        error_log('Removed function called getTranslations:384@/home/jovyan/work/WebApps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("npgettext") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php at line 324")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called npgettext:324@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/motranslator/src/Translator.php');
         die();
     }
 }

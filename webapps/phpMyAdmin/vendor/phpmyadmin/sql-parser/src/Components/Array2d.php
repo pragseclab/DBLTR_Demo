@@ -3,7 +3,7 @@
 /**
  * `VALUES` keyword parser.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
@@ -11,10 +11,13 @@ use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
 use PhpMyAdmin\SqlParser\Translator;
-use function count;
-use function sprintf;
+
 /**
  * `VALUES` keyword parser.
+ *
+ * @category   Keywords
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class Array2d extends Component
 {
@@ -27,13 +30,15 @@ class Array2d extends Component
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = [];
+        $ret = array();
+
         /**
          * The number of values in each set.
          *
          * @var int
          */
         $count = -1;
+
         /**
          * The state of the parser.
          *
@@ -47,6 +52,7 @@ class Array2d extends Component
          * @var int
          */
         $state = 0;
+
         for (; $list->idx < $list->count; ++$list->idx) {
             /**
              * Token parsed at this moment.
@@ -54,26 +60,37 @@ class Array2d extends Component
              * @var Token
              */
             $token = $list->tokens[$list->idx];
+
             // End of statement.
             if ($token->type === Token::TYPE_DELIMITER) {
                 break;
             }
+
             // Skipping whitespaces and comments.
-            if ($token->type === Token::TYPE_WHITESPACE || $token->type === Token::TYPE_COMMENT) {
+            if (($token->type === Token::TYPE_WHITESPACE) || ($token->type === Token::TYPE_COMMENT)) {
                 continue;
             }
+
             // No keyword is expected.
-            if ($token->type === Token::TYPE_KEYWORD && $token->flags & Token::FLAG_KEYWORD_RESERVED) {
+            if (($token->type === Token::TYPE_KEYWORD) && ($token->flags & Token::FLAG_KEYWORD_RESERVED)) {
                 break;
             }
+
             if ($state === 0) {
                 if ($token->value === '(') {
                     $arr = ArrayObj::parse($parser, $list, $options);
                     $arrCount = count($arr->values);
                     if ($count === -1) {
                         $count = $arrCount;
-                    } elseif ($arrCount !== $count) {
-                        $parser->error(sprintf(Translator::gettext('%1$d values were expected, but found %2$d.'), $count, $arrCount), $token);
+                    } elseif ($arrCount != $count) {
+                        $parser->error(
+                            sprintf(
+                                Translator::gettext('%1$d values were expected, but found %2$d.'),
+                                $count,
+                                $arrCount
+                            ),
+                            $token
+                        );
                     }
                     $ret[] = $arr;
                     $state = 1;
@@ -88,12 +105,19 @@ class Array2d extends Component
                 }
             }
         }
+
         if ($state === 0) {
-            $parser->error('An opening bracket followed by a set of values was expected.', $list->tokens[$list->idx]);
+            $parser->error(
+                'An opening bracket followed by a set of values was expected.',
+                $list->tokens[$list->idx]
+            );
         }
+
         --$list->idx;
+
         return $ret;
     }
+
     /**
      * @param ArrayObj[] $component the component to be built
      * @param array      $options   parameters for building

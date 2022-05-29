@@ -3,7 +3,7 @@
 /**
  * `REPLACE` statement.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Statements;
 
 use PhpMyAdmin\SqlParser\Components\Array2d;
@@ -14,9 +14,7 @@ use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Statement;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function count;
-use function strlen;
-use function trim;
+
 /**
  * `REPLACE` statement.
  *
@@ -37,6 +35,10 @@ use function trim;
  *   [PARTITION (partition_name,...)]
  *   [(col_name,...)]
  *   SELECT ...
+ *
+ * @category   Statements
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class ReplaceStatement extends Statement
 {
@@ -45,19 +47,25 @@ class ReplaceStatement extends Statement
      *
      * @var array
      */
-    public static $OPTIONS = array('LOW_PRIORITY' => 1, 'DELAYED' => 1);
+    public static $OPTIONS = array(
+        'LOW_PRIORITY' => 1,
+        'DELAYED' => 1,
+    );
+
     /**
      * Tables used as target for this statement.
      *
      * @var IntoKeyword
      */
     public $into;
+
     /**
      * Values to be replaced.
      *
      * @var Array2d
      */
     public $values;
+
     /**
      * If SET clause is present
      * holds the SetOperation.
@@ -65,6 +73,7 @@ class ReplaceStatement extends Statement
      * @var SetOperation[]
      */
     public $set;
+
     /**
      * If SELECT clause is present
      * holds the SelectStatement.
@@ -72,33 +81,42 @@ class ReplaceStatement extends Statement
      * @var SelectStatement
      */
     public $select;
+
     /**
      * @return string
      */
     public function build()
     {
-        $ret = 'REPLACE ' . $this->options;
-        $ret = trim($ret) . ' INTO ' . $this->into;
-        if ($this->values !== null && count($this->values) > 0) {
+        $ret = 'REPLACE ' . $this->options . ' INTO ' . $this->into;
+
+        if ($this->values != null && count($this->values) > 0) {
             $ret .= ' VALUES ' . Array2d::build($this->values);
-        } elseif ($this->set !== null && count($this->set) > 0) {
+        } elseif ($this->set != null && count($this->set) > 0) {
             $ret .= ' SET ' . SetOperation::build($this->set);
-        } elseif ($this->select !== null && strlen((string) $this->select) > 0) {
+        } elseif ($this->select != null && strlen($this->select) > 0) {
             $ret .= ' ' . $this->select->build();
         }
+
         return $ret;
     }
+
     /**
      * @param Parser     $parser the instance that requests parsing
      * @param TokensList $list   the list of tokens to be parsed
      */
     public function parse(Parser $parser, TokensList $list)
     {
-        ++$list->idx;
-        // Skipping `REPLACE`.
+        ++$list->idx; // Skipping `REPLACE`.
+
         // parse any options if provided
-        $this->options = OptionsArray::parse($parser, $list, static::$OPTIONS);
+        $this->options = OptionsArray::parse(
+            $parser,
+            $list,
+            static::$OPTIONS
+        );
+
         ++$list->idx;
+
         /**
          * The state of the parser.
          *
@@ -111,6 +129,7 @@ class ReplaceStatement extends Statement
          * @var int
          */
         $state = 0;
+
         for (; $list->idx < $list->count; ++$list->idx) {
             /**
              * Token parsed at this moment.
@@ -118,45 +137,64 @@ class ReplaceStatement extends Statement
              * @var Token
              */
             $token = $list->tokens[$list->idx];
+
             // End of statement.
             if ($token->type === Token::TYPE_DELIMITER) {
                 break;
             }
+
             // Skipping whitespaces and comments.
-            if ($token->type === Token::TYPE_WHITESPACE || $token->type === Token::TYPE_COMMENT) {
+            if (($token->type === Token::TYPE_WHITESPACE) || ($token->type === Token::TYPE_COMMENT)) {
                 continue;
             }
+
             if ($state === 0) {
-                if ($token->type === Token::TYPE_KEYWORD && $token->keyword !== 'INTO') {
+                if ($token->type === Token::TYPE_KEYWORD
+                    && $token->keyword !== 'INTO'
+                ) {
                     $parser->error('Unexpected keyword.', $token);
                     break;
                 }
                 ++$list->idx;
-                $this->into = IntoKeyword::parse($parser, $list, ['fromReplace' => true]);
+                $this->into = IntoKeyword::parse(
+                    $parser,
+                    $list,
+                    array('fromReplace' => true)
+                );
+
                 $state = 1;
             } elseif ($state === 1) {
                 if ($token->type === Token::TYPE_KEYWORD) {
-                    if ($token->keyword === 'VALUE' || $token->keyword === 'VALUES') {
-                        ++$list->idx;
-                        // skip VALUES
+                    if ($token->keyword === 'VALUE'
+                        || $token->keyword === 'VALUES'
+                    ) {
+                        ++$list->idx; // skip VALUES
+
                         $this->values = Array2d::parse($parser, $list);
                     } elseif ($token->keyword === 'SET') {
-                        ++$list->idx;
-                        // skip SET
+                        ++$list->idx; // skip SET
+
                         $this->set = SetOperation::parse($parser, $list);
                     } elseif ($token->keyword === 'SELECT') {
                         $this->select = new SelectStatement($parser, $list);
                     } else {
-                        $parser->error('Unexpected keyword.', $token);
+                        $parser->error(
+                            'Unexpected keyword.',
+                            $token
+                        );
                         break;
                     }
                     $state = 2;
                 } else {
-                    $parser->error('Unexpected token.', $token);
+                    $parser->error(
+                        'Unexpected token.',
+                        $token
+                    );
                     break;
                 }
             }
         }
+
         --$list->idx;
     }
 }

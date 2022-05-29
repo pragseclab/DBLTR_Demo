@@ -3,16 +3,19 @@
 /**
  * Token utilities.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Utils;
 
 use PhpMyAdmin\SqlParser\Lexer;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function count;
-use function strcasecmp;
+
 /**
  * Token utilities.
+ *
+ * @category   Token
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class Tokens
 {
@@ -27,30 +30,42 @@ class Tokens
     public static function match(Token $token, array $pattern)
     {
         // Token.
-        if (isset($pattern['token']) && $pattern['token'] !== $token->token) {
+        if ((isset($pattern['token']))
+            && ($pattern['token'] !== $token->token)
+        ) {
             return false;
         }
+
         // Value.
-        if (isset($pattern['value']) && $pattern['value'] !== $token->value) {
+        if ((isset($pattern['value']))
+            && ($pattern['value'] !== $token->value)
+        ) {
             return false;
         }
-        if (isset($pattern['value_str']) && strcasecmp($pattern['value_str'], (string) $token->value)) {
+
+        if ((isset($pattern['value_str']))
+            && (strcasecmp($pattern['value_str'], $token->value))
+        ) {
             return false;
         }
+
         // Type.
-        if (isset($pattern['type']) && $pattern['type'] !== $token->type) {
+        if ((isset($pattern['type']))
+            && ($pattern['type'] !== $token->type)
+        ) {
             return false;
         }
+
         // Flags.
-        return !isset($pattern['flags']) || !(($pattern['flags'] & $token->flags) === 0);
+        if ((isset($pattern['flags']))
+            && (($pattern['flags'] & $token->flags) === 0)
+        ) {
+            return false;
+        }
+
+        return true;
     }
-    /**
-     * @param TokensList|string|UtfString $list
-     * @param array                       $find
-     * @param array                       $replace
-     *
-     * @return TokensList
-     */
+
     public static function replaceTokens($list, array $find, array $replace)
     {
         /**
@@ -59,28 +74,33 @@ class Tokens
          * @var bool
          */
         $isList = $list instanceof TokensList;
+
         // Parsing the tokens.
         if (!$isList) {
             $list = Lexer::getTokens($list);
         }
+
         /**
          * The list to be returned.
          *
          * @var array
          */
-        $newList = [];
+        $newList = array();
+
         /**
          * The length of the find pattern is calculated only once.
          *
          * @var int
          */
         $findCount = count($find);
+
         /**
          * The starting index of the pattern.
          *
          * @var int
          */
         $i = 0;
+
         while ($i < $list->count) {
             // A sequence may not start with a comment.
             if ($list->tokens[$i]->type === Token::TYPE_COMMENT) {
@@ -88,6 +108,7 @@ class Tokens
                 ++$i;
                 continue;
             }
+
             /**
              * The index used to parse `$list->tokens`.
              *
@@ -97,6 +118,7 @@ class Tokens
              * @var int
              */
             $j = $i;
+
             /**
              * The index used to parse `$find`.
              *
@@ -106,26 +128,31 @@ class Tokens
              * @var int
              */
             $k = 0;
+
             // Checking if the next tokens match the pattern described.
-            while ($j < $list->count && $k < $findCount) {
+            while (($j < $list->count) && ($k < $findCount)) {
                 // Comments are being skipped.
                 if ($list->tokens[$j]->type === Token::TYPE_COMMENT) {
                     ++$j;
                 }
+
                 if (!static::match($list->tokens[$j], $find[$k])) {
                     // This token does not match the pattern.
                     break;
                 }
+
                 // Going to next token and segment of find pattern.
                 ++$j;
                 ++$k;
             }
+
             // Checking if the sequence was found.
             if ($k === $findCount) {
                 // Inserting new tokens.
                 foreach ($replace as $token) {
                     $newList[] = $token;
                 }
+
                 // Skipping next `$findCount` tokens.
                 $i = $j;
             } else {
@@ -134,6 +161,8 @@ class Tokens
                 ++$i;
             }
         }
-        return $isList ? new TokensList($newList) : TokensList::build($newList);
+
+        return $isList ?
+            new TokensList($newList) : TokensList::build($newList);
     }
 }

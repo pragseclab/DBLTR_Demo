@@ -8,9 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Argument\Token;
 
 use Prophecy\Exception\InvalidArgumentException;
+
 /**
  * Value type token.
  *
@@ -19,6 +21,7 @@ use Prophecy\Exception\InvalidArgumentException;
 class TypeToken implements TokenInterface
 {
     private $type;
+
     /**
      * @param string $type
      */
@@ -26,10 +29,14 @@ class TypeToken implements TokenInterface
     {
         $checker = "is_{$type}";
         if (!function_exists($checker) && !interface_exists($type) && !class_exists($type)) {
-            throw new InvalidArgumentException(sprintf('Type or class name expected as an argument to TypeToken, but got %s.', $type));
+            throw new InvalidArgumentException(sprintf(
+                'Type or class name expected as an argument to TypeToken, but got %s.', $type
+            ));
         }
+
         $this->type = $type;
     }
+
     /**
      * Scores 5 if argument has the same type this token was constructed with.
      *
@@ -43,8 +50,10 @@ class TypeToken implements TokenInterface
         if (function_exists($checker)) {
             return call_user_func($checker, $argument) ? 5 : false;
         }
+
         return $argument instanceof $this->type ? 5 : false;
     }
+
     /**
      * Returns false.
      *
@@ -54,6 +63,7 @@ class TypeToken implements TokenInterface
     {
         return false;
     }
+
     /**
      * Returns string representation for token.
      *

@@ -8,12 +8,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Doubler\ClassPatch;
 
 use Prophecy\Doubler\Generator\Node\ClassNode;
 use Prophecy\Doubler\Generator\Node\MethodNode;
 use Prophecy\PhpDocumentor\ClassAndInterfaceTagRetriever;
 use Prophecy\PhpDocumentor\MethodTagRetrieverInterface;
+
 /**
  * Discover Magical API using "@method" PHPDoc format.
  *
@@ -24,10 +26,12 @@ use Prophecy\PhpDocumentor\MethodTagRetrieverInterface;
 class MagicCallPatch implements ClassPatchInterface
 {
     private $tagRetriever;
+
     public function __construct(MethodTagRetrieverInterface $tagRetriever = null)
     {
         $this->tagRetriever = null === $tagRetriever ? new ClassAndInterfaceTagRetriever() : $tagRetriever;
     }
+
     /**
      * Support any class
      *
@@ -39,6 +43,7 @@ class MagicCallPatch implements ClassPatchInterface
     {
         return true;
     }
+
     /**
      * Discover Magical API
      *
@@ -50,25 +55,27 @@ class MagicCallPatch implements ClassPatchInterface
             return 0 !== strpos($interface, 'Prophecy\\');
         });
         $types[] = $node->getParentClass();
+
         foreach ($types as $type) {
             $reflectionClass = new \ReflectionClass($type);
-            while ($reflectionClass) {
-                $tagList = $this->tagRetriever->getTagList($reflectionClass);
-                foreach ($tagList as $tag) {
-                    $methodName = $tag->getMethodName();
-                    if (empty($methodName)) {
-                        continue;
-                    }
-                    if (!$reflectionClass->hasMethod($methodName)) {
-                        $methodNode = new MethodNode($methodName);
-                        $methodNode->setStatic($tag->isStatic());
-                        $node->addMethod($methodNode);
-                    }
+            $tagList = $this->tagRetriever->getTagList($reflectionClass);
+
+            foreach($tagList as $tag) {
+                $methodName = $tag->getMethodName();
+
+                if (empty($methodName)) {
+                    continue;
                 }
-                $reflectionClass = $reflectionClass->getParentClass();
+
+                if (!$reflectionClass->hasMethod($methodName)) {
+                    $methodNode = new MethodNode($methodName);
+                    $methodNode->setStatic($tag->isStatic());
+                    $node->addMethod($methodNode);
+                }
             }
         }
     }
+
     /**
      * Returns patch priority, which determines when patch will be applied.
      *
@@ -79,3 +86,4 @@ class MagicCallPatch implements ClassPatchInterface
         return 50;
     }
 }
+

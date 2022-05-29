@@ -3,7 +3,7 @@
 /**
  * The definition of a parameter of a function or procedure.
  */
-declare (strict_types=1);
+
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
@@ -11,11 +11,13 @@ use PhpMyAdmin\SqlParser\Context;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function implode;
-use function is_array;
-use function trim;
+
 /**
  * The definition of a parameter of a function or procedure.
+ *
+ * @category   Components
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class ParameterDefinition extends Component
 {
@@ -25,29 +27,21 @@ class ParameterDefinition extends Component
      * @var string
      */
     public $name;
+
     /**
      * Parameter's direction (IN, OUT or INOUT).
      *
      * @var string
      */
     public $inOut;
+
     /**
      * The data type of thew new column.
      *
      * @var DataType
      */
     public $type;
-    /**
-     * @param string   $name  parameter's name
-     * @param string   $inOut parameter's directional type (IN / OUT or None)
-     * @param DataType $type  parameter's type
-     */
-    public function __construct($name = null, $inOut = null, $type = null)
-    {
-        $this->name = $name;
-        $this->inOut = $inOut;
-        $this->type = $type;
-    }
+
     /**
      * @param Parser     $parser  the parser that serves as context
      * @param TokensList $list    the list of tokens that are being parsed
@@ -57,8 +51,10 @@ class ParameterDefinition extends Component
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = [];
-        $expr = new static();
+        $ret = array();
+
+        $expr = new self();
+
         /**
          * The state of the parser.
          *
@@ -77,6 +73,7 @@ class ParameterDefinition extends Component
          * @var int
          */
         $state = 0;
+
         for (; $list->idx < $list->count; ++$list->idx) {
             /**
              * Token parsed at this moment.
@@ -84,21 +81,24 @@ class ParameterDefinition extends Component
              * @var Token
              */
             $token = $list->tokens[$list->idx];
+
             // End of statement.
             if ($token->type === Token::TYPE_DELIMITER) {
                 break;
             }
+
             // Skipping whitespaces and comments.
-            if ($token->type === Token::TYPE_WHITESPACE || $token->type === Token::TYPE_COMMENT) {
+            if (($token->type === Token::TYPE_WHITESPACE) || ($token->type === Token::TYPE_COMMENT)) {
                 continue;
             }
+
             if ($state === 0) {
-                if ($token->type === Token::TYPE_OPERATOR && $token->value === '(') {
+                if (($token->type === Token::TYPE_OPERATOR) && ($token->value === '(')) {
                     $state = 1;
                 }
                 continue;
             } elseif ($state === 1) {
-                if ($token->value === 'IN' || $token->value === 'OUT' || $token->value === 'INOUT') {
+                if (($token->value === 'IN') || ($token->value === 'OUT') || ($token->value === 'INOUT')) {
                     $expr->inOut = $token->value;
                     ++$list->idx;
                 } elseif ($token->value === ')') {
@@ -113,7 +113,7 @@ class ParameterDefinition extends Component
                 $state = 3;
             } elseif ($state === 3) {
                 $ret[] = $expr;
-                $expr = new static();
+                $expr = new self();
                 if ($token->value === ',') {
                     $state = 1;
                 } elseif ($token->value === ')') {
@@ -122,13 +122,17 @@ class ParameterDefinition extends Component
                 }
             }
         }
+
         // Last iteration was not saved.
-        if (isset($expr->name) && $expr->name !== '') {
+        if ((isset($expr->name)) && ($expr->name !== '')) {
             $ret[] = $expr;
         }
+
         --$list->idx;
+
         return $ret;
     }
+
     /**
      * @param ParameterDefinition[] $component the component to be built
      * @param array                 $options   parameters for building
@@ -140,10 +144,14 @@ class ParameterDefinition extends Component
         if (is_array($component)) {
             return '(' . implode(', ', $component) . ')';
         }
+
         $tmp = '';
         if (!empty($component->inOut)) {
             $tmp .= $component->inOut . ' ';
         }
-        return trim($tmp . Context::escape($component->name) . ' ' . $component->type);
+
+        return trim(
+            $tmp . Context::escape($component->name) . ' ' . $component->type
+        );
     }
 }

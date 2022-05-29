@@ -8,10 +8,12 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Prophecy\Doubler\ClassPatch;
 
 use Prophecy\Doubler\Generator\Node\ClassNode;
 use Prophecy\Doubler\Generator\Node\MethodNode;
+
 /**
  * Traversable interface patch.
  * Forces classes that implement interfaces, that extend Traversable to also implement Iterator.
@@ -35,6 +37,7 @@ class TraversablePatch implements ClassPatchInterface
         if (in_array('IteratorAggregate', $node->getInterfaces())) {
             return false;
         }
+
         foreach ($node->getInterfaces() as $interface) {
             if ('Traversable' !== $interface && !is_subclass_of($interface, 'Traversable')) {
                 continue;
@@ -45,10 +48,13 @@ class TraversablePatch implements ClassPatchInterface
             if ('IteratorAggregate' === $interface || is_subclass_of($interface, 'IteratorAggregate')) {
                 continue;
             }
+
             return true;
         }
+
         return false;
     }
+
     /**
      * Forces class to implement Iterator interface.
      *
@@ -57,12 +63,14 @@ class TraversablePatch implements ClassPatchInterface
     public function apply(ClassNode $node)
     {
         $node->addInterface('Iterator');
+
         $node->addMethod(new MethodNode('current'));
         $node->addMethod(new MethodNode('key'));
         $node->addMethod(new MethodNode('next'));
         $node->addMethod(new MethodNode('rewind'));
         $node->addMethod(new MethodNode('valid'));
     }
+
     /**
      * Returns patch priority, which determines when patch will be applied.
      *

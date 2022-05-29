@@ -1,9 +1,5 @@
 # Change Log
 
-## [2.1] - 2017-05-15
-
-* Documentation improvements.
-
 ## [2.0] - 2017-01-23
 
 * Switched to PhpMyAdmin vendor namespace to follow PSR-4.

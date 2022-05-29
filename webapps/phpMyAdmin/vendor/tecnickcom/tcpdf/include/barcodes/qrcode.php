@@ -1300,7 +1300,7 @@ class QRcode
      */
     protected function makeMask($width, $frame, $maskNo, $level)
     {
-        $masked = array_fill(0, $width, str_repeat("\x00", $width));
+        $masked = array_fill(0, $width, str_repeat("\0", $width));
         $this->makeMaskNo($maskNo, $width, $frame, $masked);
         $this->writeFormatInformation($width, $masked, $maskNo, $level);
         return $masked;
@@ -1416,7 +1416,7 @@ class QRcode
         }
         $bestMask = $frame;
         foreach ($checked_masks as $i) {
-            $mask = array_fill(0, $width, str_repeat("\x00", $width));
+            $mask = array_fill(0, $width, str_repeat("\0", $width));
             $demerit = 0;
             $blacks = 0;
             $blacks = $this->makeMaskNo($i, $width, $frame, $mask);
@@ -2557,7 +2557,7 @@ class QRcode
      */
     protected function putAlignmentMarker($frame, $ox, $oy)
     {
-        $finder = array("\xa1\xa1\xa1\xa1\xa1", "\xa1\xa0\xa0\xa0\xa1", "\xa1\xa0\xa1\xa0\xa1", "\xa1\xa0\xa0\xa0\xa1", "\xa1\xa1\xa1\xa1\xa1");
+        $finder = array("¡¡¡¡¡", "¡   ¡", "¡ ¡ ¡", "¡   ¡", "¡¡¡¡¡");
         $yStart = $oy - 2;
         $xStart = $ox - 2;
         for ($y = 0; $y < 5; $y++) {
@@ -2644,7 +2644,7 @@ class QRcode
      */
     protected function putFinderPattern($frame, $ox, $oy)
     {
-        $finder = array("\xc1\xc1\xc1\xc1\xc1\xc1\xc1", "\xc1\xc0\xc0\xc0\xc0\xc0\xc1", "\xc1\xc0\xc1\xc1\xc1\xc0\xc1", "\xc1\xc0\xc1\xc1\xc1\xc0\xc1", "\xc1\xc0\xc1\xc1\xc1\xc0\xc1", "\xc1\xc0\xc0\xc0\xc0\xc0\xc1", "\xc1\xc1\xc1\xc1\xc1\xc1\xc1");
+        $finder = array("ÁÁÁÁÁÁÁ", "ÁÀÀÀÀÀÁ", "ÁÀÁÁÁÀÁ", "ÁÀÁÁÁÀÁ", "ÁÀÁÁÁÀÁ", "ÁÀÀÀÀÀÁ", "ÁÁÁÁÁÁÁ");
         for ($y = 0; $y < 7; $y++) {
             $frame = $this->qrstrset($frame, $ox, $oy + $y, $finder[$y]);
         }
@@ -2658,7 +2658,7 @@ class QRcode
     protected function createFrame($version)
     {
         $width = $this->capacity[$version][QRCAP_WIDTH];
-        $frameLine = str_repeat("\x00", $width);
+        $frameLine = str_repeat("\0", $width);
         $frame = array_fill(0, $width, $frameLine);
         // Finder pattern
         $frame = $this->putFinderPattern($frame, 0, 0);
@@ -2667,23 +2667,23 @@ class QRcode
         // Separator
         $yOffset = $width - 7;
         for ($y = 0; $y < 7; ++$y) {
-            $frame[$y][7] = "\xc0";
-            $frame[$y][$width - 8] = "\xc0";
-            $frame[$yOffset][7] = "\xc0";
+            $frame[$y][7] = "À";
+            $frame[$y][$width - 8] = "À";
+            $frame[$yOffset][7] = "À";
             ++$yOffset;
         }
-        $setPattern = str_repeat("\xc0", 8);
+        $setPattern = str_repeat("À", 8);
         $frame = $this->qrstrset($frame, 0, 7, $setPattern);
         $frame = $this->qrstrset($frame, $width - 8, 7, $setPattern);
         $frame = $this->qrstrset($frame, 0, $width - 8, $setPattern);
         // Format info
-        $setPattern = str_repeat("\x84", 9);
+        $setPattern = str_repeat("„", 9);
         $frame = $this->qrstrset($frame, 0, 8, $setPattern);
         $frame = $this->qrstrset($frame, $width - 8, 8, $setPattern, 8);
         $yOffset = $width - 8;
         for ($y = 0; $y < 8; ++$y, ++$yOffset) {
-            $frame[$y][8] = "\x84";
-            $frame[$yOffset][8] = "\x84";
+            $frame[$y][8] = "„";
+            $frame[$yOffset][8] = "„";
         }
         // Timing pattern
         $wo = $width - 15;
@@ -2712,7 +2712,7 @@ class QRcode
             }
         }
         // and a little bit...
-        $frame[$width - 8][8] = "\x81";
+        $frame[$width - 8][8] = "";
         return $frame;
     }
     /**

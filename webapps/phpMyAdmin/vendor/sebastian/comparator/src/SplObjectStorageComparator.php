@@ -1,13 +1,13 @@
 <?php
-
 /*
- * This file is part of sebastian/comparator.
+ * This file is part of the Comparator package.
  *
  * (c) Sebastian Bergmann <sebastian@phpunit.de>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace SebastianBergmann\Comparator;
 
 /**
@@ -18,15 +18,15 @@ class SplObjectStorageComparator extends Comparator
     /**
      * Returns whether the comparator can compare two values.
      *
-     * @param mixed $expected The first value to compare
-     * @param mixed $actual   The second value to compare
-     *
+     * @param  mixed $expected The first value to compare
+     * @param  mixed $actual   The second value to compare
      * @return bool
      */
     public function accepts($expected, $actual)
     {
         return $expected instanceof \SplObjectStorage && $actual instanceof \SplObjectStorage;
     }
+
     /**
      * Asserts that two values are equal.
      *
@@ -42,12 +42,27 @@ class SplObjectStorageComparator extends Comparator
     {
         foreach ($actual as $object) {
             if (!$expected->contains($object)) {
-                throw new ComparisonFailure($expected, $actual, $this->exporter->export($expected), $this->exporter->export($actual), false, 'Failed asserting that two objects are equal.');
+                throw new ComparisonFailure(
+                    $expected,
+                    $actual,
+                    $this->exporter->export($expected),
+                    $this->exporter->export($actual),
+                    false,
+                    'Failed asserting that two objects are equal.'
+                );
             }
         }
+
         foreach ($expected as $object) {
             if (!$actual->contains($object)) {
-                throw new ComparisonFailure($expected, $actual, $this->exporter->export($expected), $this->exporter->export($actual), false, 'Failed asserting that two objects are equal.');
+                throw new ComparisonFailure(
+                    $expected,
+                    $actual,
+                    $this->exporter->export($expected),
+                    $this->exporter->export($actual),
+                    false,
+                    'Failed asserting that two objects are equal.'
+                );
             }
         }
     }

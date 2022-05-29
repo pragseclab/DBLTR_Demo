@@ -4,22 +4,20 @@
  * Parses a reference to an expression (column, table or database name, function
  * call, mathematical expression, etc.).
  */
-declare (strict_types=1);
 namespace PhpMyAdmin\SqlParser\Components;
 
 use PhpMyAdmin\SqlParser\Component;
 use PhpMyAdmin\SqlParser\Context;
-use PhpMyAdmin\SqlParser\Exceptions\ParserException;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
 use PhpMyAdmin\SqlParser\TokensList;
-use function implode;
-use function is_array;
-use function strlen;
-use function trim;
 /**
  * Parses a reference to an expression (column, table or database name, function
  * call, mathematical expression, etc.).
+ *
+ * @category   Components
+ *
+ * @license    https://www.gnu.org/licenses/gpl-2.0.txt GPL-2.0+
  */
 class Expression extends Component
 {
@@ -72,6 +70,8 @@ class Expression extends Component
      */
     public $subquery;
     /**
+     * Constructor.
+     *
      * Syntax:
      *     new Expression('expr')
      *     new Expression('expr', 'alias')
@@ -136,13 +136,11 @@ class Expression extends Component
      * @param TokensList $list    the list of tokens that are being parsed
      * @param array      $options parameters for parsing
      *
-     * @return Expression|null
-     *
-     * @throws ParserException
+     * @return Expression
      */
     public static function parse(Parser $parser, TokensList $list, array $options = array())
     {
-        $ret = new static();
+        $ret = new self();
         /**
          * Whether current tokens make an expression or a table reference.
          *
@@ -172,7 +170,7 @@ class Expression extends Component
          *
          * @var Token[]
          */
-        $prev = [null, null];
+        $prev = array(null, null);
         // When a field is parsed, no parentheses are expected.
         if (!empty($options['parseField'])) {
             $options['breakOnParentheses'] = true;
@@ -229,12 +227,12 @@ class Expression extends Component
                         continue;
                     }
                     $isExpr = true;
-                } elseif ($brackets === 0 && strlen((string) $ret->expr) > 0 && !$alias) {
+                } elseif ($brackets === 0 && strlen($ret->expr) > 0 && !$alias) {
                     /* End of expression */
                     break;
                 }
             }
-            if ($token->type === Token::TYPE_NUMBER || $token->type === Token::TYPE_BOOL || $token->type === Token::TYPE_SYMBOL && $token->flags & Token::FLAG_SYMBOL_VARIABLE || $token->type === Token::TYPE_SYMBOL && $token->flags & Token::FLAG_SYMBOL_PARAMETER || $token->type === Token::TYPE_OPERATOR && $token->value !== '.') {
+            if ($token->type === Token::TYPE_NUMBER || $token->type === Token::TYPE_BOOL || $token->type === Token::TYPE_SYMBOL && $token->flags & Token::FLAG_SYMBOL_VARIABLE || $token->type === Token::TYPE_OPERATOR && $token->value !== '.') {
                 if (!empty($options['parseField'])) {
                     break;
                 }
@@ -252,25 +250,23 @@ class Expression extends Component
                     if (empty($ret->function) && $prev[1] !== null && ($prev[1]->type === Token::TYPE_NONE || $prev[1]->type === Token::TYPE_SYMBOL || $prev[1]->type === Token::TYPE_KEYWORD && $prev[1]->flags & Token::FLAG_KEYWORD_FUNCTION)) {
                         $ret->function = $prev[1]->value;
                     }
+                } elseif ($token->value === ')' && $brackets == 0) {
+                    // Not our bracket
+                    break;
                 } elseif ($token->value === ')') {
+                    --$brackets;
                     if ($brackets === 0) {
-                        // Not our bracket
-                        break;
-                    } else {
-                        --$brackets;
-                        if ($brackets === 0) {
-                            if (!empty($options['parenthesesDelimited'])) {
-                                // The current token is the last bracket, the next
-                                // one will be outside the expression.
-                                $ret->expr .= $token->token;
-                                ++$list->idx;
-                                break;
-                            }
-                        } elseif ($brackets < 0) {
-                            // $parser->error('Unexpected closing bracket.', $token);
-                            // $brackets = 0;
+                        if (!empty($options['parenthesesDelimited'])) {
+                            // The current token is the last bracket, the next
+                            // one will be outside the expression.
+                            $ret->expr .= $token->token;
+                            ++$list->idx;
                             break;
                         }
+                    } elseif ($brackets < 0) {
+                        // $parser->error('Unexpected closing bracket.', $token);
+                        // $brackets = 0;
+                        break;
                     }
                 } elseif ($token->value === ',') {
                     // Expressions are comma-delimited.
@@ -338,7 +334,7 @@ class Expression extends Component
             $parser->error('An alias was expected.', $list->tokens[$list->idx - 1]);
         }
         // White-spaces might be added at the end.
-        $ret->expr = trim((string) $ret->expr);
+        $ret->expr = trim($ret->expr);
         if ($ret->expr === '') {
             return null;
         }
@@ -353,27 +349,8 @@ class Expression extends Component
      */
     public static function build($component, array $options = array())
     {
-        if (is_array($component)) {
-            return implode(', ', $component);
-        }
-        if ($component->expr !== '' && $component->expr !== null) {
-            $ret = $component->expr;
-        } else {
-            $fields = [];
-            if (isset($component->database) && $component->database !== '') {
-                $fields[] = $component->database;
-            }
-            if (isset($component->table) && $component->table !== '') {
-                $fields[] = $component->table;
-            }
-            if (isset($component->column) && $component->column !== '') {
-                $fields[] = $component->column;
-            }
-            $ret = implode('.', Context::escape($fields));
-        }
-        if (!empty($component->alias)) {
-            $ret .= ' AS ' . Context::escape($component->alias);
-        }
-        return $ret;
+        echo('<html><head>    <meta charset="utf-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Error, Target Function Has Been Removed</title>    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">    <style>        * {            font-family: tahoma;        }        div.container .panel {            position: relative !important;        }        div.container {            width: 50% !important;            height: 50% !important;            overflow: auto !important;            margin: auto !important;            position: absolute !important;            top: 0 !important;            left: 0 !important;            bottom: 0 !important;            right: 0 !important;        }    </style></head><body>    <div class="container">        <div class="panel panel-danger center">            <div class="panel-heading" style="text-align: left;"> Error </div>            <div class="panel-body">                <p class="text-center">                  This function has been removed ("build") from ("/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/Expression.php at line 419")                </p>            </div>        </div>    </div></body></html>');
+        error_log('Removed function called build:419@/home/jovyan/work/webapps/PMA_spectral_Clusters/PMA_spectral_0/vendor/phpmyadmin/sql-parser/src/Components/Expression.php');
+        die();
     }
 }
