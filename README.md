@@ -44,7 +44,7 @@ For the sections where pickle file is available, you can jump to the end of the 
   Upon logging in, each the authentication cookie of each user is extracted by our OpenResty Lua modules and stored in the Redis datastore. Subsequent requests from users containing the authentication cookie will instruct the reverse-proxy to transparently route their requests towards their custom debloated web applications. 
   Responses from *DBLTR* will include an "active_proxy" HTTP header to show which backend served that request. 
   
-A Demo of *DBLTR* protecting users against CVE-2019-12616 is available here at: https://vimeo.com/manage/videos/652161913
+A Demo of *DBLTR* protecting users against CVE-2019-12616 is available here at: https://vimeo.com/652161913/bc5fdd1eea
 
 ### Adding new web applications to *DBLTR* 
 
